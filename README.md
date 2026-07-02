@@ -182,12 +182,12 @@ avtomatik yuklanadi.
    (masalan `C:\Plugins\SalohiyatTable\`).
 2. `LoadPtable.lsp` ni bloknotda oching va yuqoridagi qatorni o'z yo'lingizga moslang:
    ```lisp
-   (setq *SalohiyatTableDllPath* "C:/Plugins/SalohiyatTable/SalohiyatTable.dll")
+   (setq SALOHIYAT_DLL_PATH "C:\\SalohiyatTable.dll")
    ```
-   > Yo'lda `\` o'rniga `/` yoki `\\` ishlating (masalan `C:/Plugins/.../SalohiyatTable.dll`).
-3. AutoCAD'da `APPLOAD` buyrug'ini yozing → **Startup Suite** bo'limidagi **Contents...**
-   tugmasini bosing → **Add...** → `LoadPtable.lsp` ni tanlang → **Close**.
-4. AutoCAD'ni qayta ishga tushiring (yoki bir marta `PTLOAD` deb yozing).
+   > Yo'lda `\` o'rniga `\\` yoki `/` ishlating (masalan `C:/Plugins/SalohiyatTable/SalohiyatTable.dll`).
+3. AutoCAD'da `APPLOAD` buyrug'ini yozing → **Startup Suite** (Приложения) → **Add...** (Добавить)
+   → `LoadPtable.lsp` ni tanlang → **Close**.
+4. AutoCAD'ni qayta ishga tushiring.
 5. Buyruqlar tayyor: `PTABLE`, `PLTABLE`, `PTCHEGARA`, `PLCHEGARA`, `PTSOZLAMA`, `PTHAQIDA`.
 
 > Fayl AutoCAD versiyasi almashsa ham ishlaydi — faqat kerak bo'lsa DLL ni mos
