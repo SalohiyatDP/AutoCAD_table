@@ -172,15 +172,28 @@ Natijada `SalohiyatTable.dll` hosil bo'ladi (`src\bin\Release\`).
 
 ---
 
-## O'rnatish va ishga tushirish
+## O'rnatish (eng oddiy va ishonchli usul — Startup Suite)
 
-1. `SalohiyatTable.dll` va `lisp\LoadPtable.lsp` ni bitta papkaga joylang.
-2. AutoCAD'da bu papkani **Options → Files → Support File Search Path** ga qo'shing.
-3. `APPLOAD` buyrug'i orqali `LoadPtable.lsp` ni yuklang
-   (doimiy bo'lishi uchun **Startup Suite** ga qo'shing).
-4. `PTABLE` yoki `PLTABLE` buyrug'ini ishga tushiring.
+Bu usulda DLL yo'li `.lsp` faylga **bir marta** yoziladi va fayl AutoCAD'ning
+**Startup Suite** iga bir marta qo'shiladi. Keyin AutoCAD har ochilganda plagin
+avtomatik yuklanadi.
 
-Muqobil yo'l: `APPLOAD` orqali to'g'ridan-to'g'ri `SalohiyatTable.dll` ni `NETLOAD` qilish.
+1. `SalohiyatTable.dll` va `LoadPtable.lsp` ni doimiy bir papkaga joylang
+   (masalan `C:\Plugins\SalohiyatTable\`).
+2. `LoadPtable.lsp` ni bloknotda oching va yuqoridagi qatorni o'z yo'lingizga moslang:
+   ```lisp
+   (setq *SalohiyatTableDllPath* "C:/Plugins/SalohiyatTable/SalohiyatTable.dll")
+   ```
+   > Yo'lda `\` o'rniga `/` yoki `\\` ishlating (masalan `C:/Plugins/.../SalohiyatTable.dll`).
+3. AutoCAD'da `APPLOAD` buyrug'ini yozing → **Startup Suite** bo'limidagi **Contents...**
+   tugmasini bosing → **Add...** → `LoadPtable.lsp` ni tanlang → **Close**.
+4. AutoCAD'ni qayta ishga tushiring (yoki bir marta `PTLOAD` deb yozing).
+5. Buyruqlar tayyor: `PTABLE`, `PLTABLE`, `PTCHEGARA`, `PLCHEGARA`, `PTSOZLAMA`, `PTHAQIDA`.
+
+> Fayl AutoCAD versiyasi almashsa ham ishlaydi — faqat kerak bo'lsa DLL ni mos
+> versiyaga qayta build qiling. `.lsp` ni Startup Suite ga qayta qo'shish shart emas.
+
+**Muqobil yo'l:** har safar `APPLOAD` orqali `SalohiyatTable.dll` ni qo'lda `NETLOAD` qilish.
 
 ---
 
