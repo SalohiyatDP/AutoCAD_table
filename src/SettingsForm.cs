@@ -1,0 +1,99 @@
+using System;
+using System.Drawing;
+using System.Globalization;
+using System.Windows.Forms;
+
+namespace SalohiyatDP.AutoCADTable
+{
+    /// <summary>
+    /// SalohiyatTable sozlamalari uchun dialog. "Saqlash" bosilganda qiymatlar
+    /// PluginSettings orqali diskka yoziladi (keyingi seanslarda ham qoladi).
+    /// </summary>
+    public class SettingsForm : Form
+    {
+        private readonly PluginSettings _s;
+
+        private TextBox _txtHeight;
+        private NumericUpDown _numDecimals;
+        private ComboBox _cmbMarker;
+
+        public SettingsForm(PluginSettings settings)
+        {
+            _s = settings ?? new PluginSettings();
+            BuildUi();
+            LoadValues();
+        }
+
+        private void BuildUi()
+        {
+            Text = "SalohiyatTable — Sozlamalar";
+            FormBorderStyle = FormBorderStyle.FixedDialog;
+            StartPosition = FormStartPosition.CenterScreen;
+            MaximizeBox = false;
+            MinimizeBox = false;
+            ClientSize = new Size(400, 190);
+            Font = new Font("Segoe UI", 9F);
+
+            int labelX = 15;
+            int inputX = 180;
+            int y = 20;
+            int step = 36;
+
+            AddLabel("Matn balandligi:", labelX, y + 3);
+            _txtHeight = new TextBox { Left = inputX, Top = y, Width = 120 };
+            Controls.Add(_txtHeight);
+            y += step;
+
+            AddLabel("O'nlik xonalar soni:", labelX, y + 3);
+            _numDecimals = new NumericUpDown { Left = inputX, Top = y, Width = 120, Minimum = 0, Maximum = 6 };
+            Controls.Add(_numDecimals);
+            y += step;
+
+            AddLabel("Nuqta belgisi:", labelX, y + 3);
+            _cmbMarker = new ComboBox { Left = inputX, Top = y, Width = 200, DropDownStyle = ComboBoxStyle.DropDownList };
+            _cmbMarker.Items.AddRange(new object[] { "Hech (belgi yo'q)", "Doira", "X belgisi" });
+            Controls.Add(_cmbMarker);
+            y += step + 16;
+
+            var btnOk = new Button { Text = "Saqlash", Left = 205, Top = y, Width = 90, DialogResult = DialogResult.OK };
+            btnOk.Click += OnSave;
+            Controls.Add(btnOk);
+
+            var btnCancel = new Button { Text = "Bekor qilish", Left = 300, Top = y, Width = 90, DialogResult = DialogResult.Cancel };
+            Controls.Add(btnCancel);
+
+            AcceptButton = btnOk;
+            CancelButton = btnCancel;
+        }
+
+        private void AddLabel(string text, int x, int y)
+        {
+            Controls.Add(new Label { Text = text, Left = x, Top = y, AutoSize = true });
+        }
+
+        private void LoadValues()
+        {
+            _txtHeight.Text = _s.TextHeight.ToString(CultureInfo.InvariantCulture);
+            _numDecimals.Value = Math.Max(0, Math.Min(6, _s.Decimals));
+            _cmbMarker.SelectedIndex = (int)_s.Marker; // None=0, Circle=1, Cross=2
+        }
+
+        private void OnSave(object sender, EventArgs e)
+        {
+            double h;
+            if (!double.TryParse(_txtHeight.Text.Replace(',', '.'),
+                    NumberStyles.Float, CultureInfo.InvariantCulture, out h) || h <= 0)
+            {
+                MessageBox.Show("Matn balandligi musbat son bo'lishi kerak.", "Xatolik",
+                    MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                DialogResult = DialogResult.None;
+                return;
+            }
+
+            _s.TextHeight = h;
+            _s.Decimals = (int)_numDecimals.Value;
+            _s.Marker = (MarkerType)_cmbMarker.SelectedIndex;
+            _s.Save();
+        }
+    }
+}

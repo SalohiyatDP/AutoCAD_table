@@ -40,25 +40,29 @@ Chegara uzunligi: <perimetr> m
 
 | Buyruq | Vazifasi |
 |--------|----------|
-| `PTABLE`  | Nuqtalarni sichqoncha bilan ketma-ket ko'rsatib jadval yasash. |
-| `PLTABLE` | Mavjud **poliliniya** (LWPOLYLINE) cho'qqilaridan jadval yasash. |
-| `PTLOAD`  | DLL ni qayta yuklash (LISP funksiyasi). |
+| `PTABLE`    | Nuqtalarni sichqoncha bilan ketma-ket ko'rsatib jadval yasash. |
+| `PLTABLE`   | Mavjud **poliliniya** (LWPOLYLINE) cho'qqilaridan jadval yasash. |
+| `PTSOZLAMA` | Sozlamalar oynasi (matn balandligi, o'nlik xonalar, nuqta belgisi). |
+| `PTHAQIDA`  | Plagin va mualliflar haqida ("Haqida" oynasi). |
+| `PTLOAD`    | DLL ni qayta yuklash (LISP funksiyasi). |
 
-Har ikki buyruqda so'raladi:
-1. **Matn balandligi** (standart `2.5`) — jadval o'lchamlari shunga moslashadi.
-2. **Nuqta belgisi turi** — `Hech` (hech narsa) / `Doira` / `Xbelgi` (X belgisi). Standart: `Hech`.
-3. **Jadval joyi** — jadvalning yuqori-chap burchagi.
+`PTABLE` / `PLTABLE` da faqat **jadval joyi** (yuqori-chap burchak) so'raladi.
+Matn balandligi, o'nlik xonalar soni va nuqta belgisi turi **sozlamalardan** olinadi
+(`PTSOZLAMA` orqali o'zgartiriladi va **saqlanadi** — keyingi seanslarda ham qoladi).
 
-Tartib raqamlari har doim **poligondan tashqariga** joylashtiriladi (kontur ichida qolmaydi).
+- Tartib raqamlari har doim **poligondan tashqariga** joylashtiriladi (kontur ichida qolmaydi).
+- Ustun kengliklari katakdagi eng uzun matnga qarab **avtomatik moslashadi** (jadval eniga ham moslashadi).
+- Sozlamalar `%APPDATA%\SalohiyatTable\settings.xml` faylida saqlanadi.
 
 ---
 
 ## Lentadagi menyu (Ribbon)
 
-Plagin yuklangach, AutoCAD lentasida (ribbon) **"SalohiyatTable"** yorlig'i paydo
-bo'ladi. Uning ichida **"Jadval"** paneli va ikkita tugma bor:
-- **Nuqtalardan jadval** → `PTABLE`
-- **Poliliniyadan jadval** → `PLTABLE`
+Plagin yuklangach, AutoCAD lentasida (ribbon) **"SalohiyatTable"** yorlig'i paydo bo'ladi:
+- **"Jadval"** paneli: **Nuqtalardan jadval** (`PTABLE`), **Poliliniyadan jadval** (`PLTABLE`).
+- **"Sozlamalar"** paneli: **Sozlamalar** (`PTSOZLAMA`), **Haqida** (`PTHAQIDA`).
+
+**Mualliflar** ma'lumoti jadvalda emas — menyudagi **"Haqida"** oynasida ko'rsatiladi.
 
 > **Muhim:** menyu tugmalari `AdWindows.dll` sborkasiga bog'liq, u esa NuGet'da yo'q —
 > faqat AutoCAD o'rnatilgan papkada bo'ladi. Shuning uchun menyu paydo bo'lishi uchun
@@ -149,8 +153,11 @@ AutoCAD_table/
 ├── SalohiyatTable.sln          # Visual Studio solution (Release|x64)
 ├── src/
 │   ├── SalohiyatTable.csproj   # .NET loyiha fayli
-│   ├── Commands.cs             # PTABLE / PLTABLE buyruqlari
+│   ├── Commands.cs             # PTABLE / PLTABLE / PTSOZLAMA / PTHAQIDA buyruqlari
 │   ├── RibbonUi.cs             # lentadagi menyu (Ribbon tab + tugmalar)
+│   ├── PluginSettings.cs       # saqlanadigan sozlamalar (XML) + plagin ma'lumoti
+│   ├── SettingsForm.cs         # sozlamalar oynasi (WinForms)
+│   ├── AboutForm.cs            # "Haqida" oynasi (mualliflar)
 │   ├── PointCollector.cs       # nuqta yig'ish (interaktiv / poliliniya)
 │   ├── MarkerDrawer.cs         # nuqta raqamlarini chizish
 │   ├── TableBuilder.cs         # jadval + yuza/perimetr matni

@@ -1,0 +1,94 @@
+using System;
+using System.IO;
+using System.Xml.Serialization;
+
+namespace SalohiyatDP.AutoCADTable
+{
+    /// <summary>Nuqta ustiga qo'yiladigan belgi turi.</summary>
+    public enum MarkerType
+    {
+        None,   // hech narsa
+        Circle, // doira
+        Cross   // X belgisi
+    }
+
+    /// <summary>
+    /// Plagin haqida ma'lumot (menyudagi "Haqida" bo'limi uchun).
+    /// </summary>
+    public static class PluginInfo
+    {
+        public const string Name = "SalohiyatTable";
+        public const string Version = "1.0";
+        public const string AuthorsTitle = "Mualliflar";
+        public const string Author1 = "Topograf : Abdujabborov Sherzod Jahongir o'g'li";
+        public const string Author2 = "Topograf : Karimbekov Asadbek Nasibbek o'g'li";
+        public const string Organization = "Tashkilot: Davlat Kadastrlari Palatasi, Kosonsoy tuman filiali";
+    }
+
+    /// <summary>
+    /// Plagin sozlamalari. %APPDATA%\SalohiyatTable\settings.xml faylida saqlanadi,
+    /// shuning uchun AutoCAD qayta ochilganda ham eslab qolinadi.
+    /// </summary>
+    [XmlRoot("SalohiyatTableSettings")]
+    public class PluginSettings
+    {
+        public double TextHeight { get; set; } = 2.5;
+        public MarkerType Marker { get; set; } = MarkerType.None;
+        public int Decimals { get; set; } = 2;
+
+        private static string FilePath
+        {
+            get
+            {
+                string dir = Path.Combine(
+                    Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
+                    "SalohiyatTable");
+                return Path.Combine(dir, "settings.xml");
+            }
+        }
+
+        /// <summary>Saqlangan sozlamalarni yuklaydi; bo'lmasa standart qiymatlar.</summary>
+        public static PluginSettings Load()
+        {
+            try
+            {
+                string path = FilePath;
+                if (File.Exists(path))
+                {
+                    var ser = new XmlSerializer(typeof(PluginSettings));
+                    using (var fs = File.OpenRead(path))
+                        return (PluginSettings)ser.Deserialize(fs);
+                }
+            }
+            catch
+            {
+                // Buzilgan/eski fayl bo'lsa - standart qiymatlarga qaytamiz.
+            }
+            return new PluginSettings();
+        }
+
+        /// <summary>Sozlamalarni diskka saqlaydi.</summary>
+        public void Save()
+        {
+            try
+            {
+                string path = FilePath;
+                Directory.CreateDirectory(Path.GetDirectoryName(path));
+                var ser = new XmlSerializer(typeof(PluginSettings));
+                using (var fs = File.Create(path))
+                    ser.Serialize(fs, this);
+            }
+            catch
+            {
+                // Yozib bo'lmasa - jimgina o'tkazamiz.
+            }
+        }
+
+        /// <summary>O'nlik xonalar soniga ko'ra format satri ("0.00" kabi).</summary>
+        public string NumberFormat()
+        {
+            int d = Decimals < 0 ? 0 : Decimals;
+            return d == 0 ? "0" : "0." + new string('0', d);
+        }
+    }
+}

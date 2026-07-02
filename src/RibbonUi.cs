@@ -77,6 +77,21 @@ namespace SalohiyatDP.AutoCADTable
                 "Poliliniyadan\njadval", "PLTABLE",
                 "Poliliniya (LWPOLYLINE) cho'qqilaridan koordinata jadvali yasash"));
 
+            // Ikkinchi panel: Sozlamalar va Haqida
+            var source2 = new RibbonPanelSource { Title = "Sozlamalar" };
+            var panel2 = new RibbonPanel { Source = source2 };
+            tab.Panels.Add(panel2);
+
+            source2.Items.Add(CreateButton(
+                "Sozlamalar", "PTSOZLAMA",
+                "Matn balandligi, o'nlik xonalar va nuqta belgisini sozlash (saqlanadi)"));
+
+            source2.Items.Add(new RibbonSeparator());
+
+            source2.Items.Add(CreateButton(
+                "Haqida", "PTHAQIDA",
+                "Plagin va mualliflar haqida ma'lumot"));
+
             // Lentani yaratilgan yorliqqa o'tkazish (ixtiyoriy)
             tab.IsActive = true;
         }

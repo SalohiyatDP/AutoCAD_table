@@ -10,6 +10,7 @@
     <Platforms>x64</Platforms>
     <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
     <GenerateAssemblyInfo>true</GenerateAssemblyInfo>
+    <UseWindowsForms>true</UseWindowsForms>
     <Company>SalohiyatDP</Company>
     <Product>SalohiyatTable</Product>
     <Description>AutoCAD uchun nuqtalarni raqamlab koordinata/masofa jadvali yasovchi plagin</Description>

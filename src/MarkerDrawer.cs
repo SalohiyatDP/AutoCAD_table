@@ -4,14 +4,6 @@ using Autodesk.AutoCAD.Geometry;
 
 namespace SalohiyatDP.AutoCADTable
 {
-    /// <summary>Nuqta ustiga qo'yiladigan belgi turi.</summary>
-    internal enum MarkerType
-    {
-        None,   // hech narsa
-        Circle, // doira
-        Cross   // X belgisi
-    }
-
     /// <summary>
     /// Har bir nuqtaga tanlangan belgini (yo'q / doira / X) chizadi va tartib raqamini
     /// POLIGONDAN TASHQARIGA joylashtiradi (raqam kontur ichida qolmaydi).

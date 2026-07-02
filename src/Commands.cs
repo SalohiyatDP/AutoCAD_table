@@ -12,8 +12,12 @@ namespace SalohiyatDP.AutoCADTable
 {
     /// <summary>
     /// Plagin buyruqlari:
-    ///   PTABLE  - nuqtalarni sichqoncha bilan ketma-ket ko'rsatib jadval yasash
-    ///   PLTABLE - mavjud poliliniya cho'qqilaridan jadval yasash
+    ///   PTABLE    - nuqtalarni sichqoncha bilan ketma-ket ko'rsatib jadval yasash
+    ///   PLTABLE   - mavjud poliliniya cho'qqilaridan jadval yasash
+    ///   PTSOZLAMA - sozlamalar oynasi (matn balandligi, xonalar, nuqta belgisi)
+    ///   PTHAQIDA  - plagin va mualliflar haqida
+    /// Matn balandligi, o'nlik xonalar va nuqta belgisi turi sozlamalardan olinadi
+    /// (PTSOZLAMA orqali o'zgartiriladi va saqlanadi).
     /// </summary>
     public class Commands
     {
@@ -59,41 +63,26 @@ namespace SalohiyatDP.AutoCADTable
             RunBuild(doc, ed, db, pts);
         }
 
+        [CommandMethod("PTSOZLAMA")]
+        public void ShowSettings()
+        {
+            PluginSettings s = PluginSettings.Load();
+            using (var form = new SettingsForm(s))
+                AcadApp.ShowModalDialog(form);
+        }
+
+        [CommandMethod("PTHAQIDA")]
+        public void ShowAbout()
+        {
+            using (var form = new AboutForm())
+                AcadApp.ShowModalDialog(form);
+        }
+
         private static void RunBuild(AcadDoc doc, Editor ed, Database db, List<Point2d> pts)
         {
-            // Matn balandligini so'rash (jadval o'lchamlari shunga moslashadi)
-            var pdo = new PromptDistanceOptions("\nMatn balandligi <2.5>: ")
-            {
-                AllowNone = true,
-                AllowNegative = false,
-                AllowZero = false,
-                DefaultValue = 2.5,
-                UseDefaultValue = true
-            };
-            PromptDoubleResult pdr = ed.GetDistance(pdo);
-            double th = (pdr.Status == PromptStatus.OK) ? pdr.Value : 2.5;
-            if (th <= 0) th = 2.5;
-
-            // Nuqta belgisi turini so'rash: Hech / Doira / X
-            MarkerType marker = MarkerType.None;
-            var pko = new PromptKeywordOptions("\nNuqta belgisi turi ")
-            {
-                AllowNone = true
-            };
-            pko.Keywords.Add("Hech");
-            pko.Keywords.Add("Doira");
-            pko.Keywords.Add("Xbelgi");
-            pko.Keywords.Default = "Hech";
-            PromptResult pkr = ed.GetKeywords(pko);
-            if (pkr.Status == PromptStatus.OK)
-            {
-                switch (pkr.StringResult)
-                {
-                    case "Doira": marker = MarkerType.Circle; break;
-                    case "Xbelgi": marker = MarkerType.Cross; break;
-                    default: marker = MarkerType.None; break;
-                }
-            }
+            // Sozlamalarni yuklaymiz (matn balandligi, xonalar, nuqta belgisi)
+            PluginSettings s = PluginSettings.Load();
+            TableOptions opt = TableOptions.FromSettings(s);
 
             // Jadval joyi (yuqori-chap burchak)
             var ppo = new PromptPointOptions("\nJadval joyini ko'rsating (yuqori-chap burchak): ");
@@ -105,17 +94,16 @@ namespace SalohiyatDP.AutoCADTable
             }
             Point3d loc = ppr.Value;
 
-            TableOptions opt = TableOptions.FromTextHeight(th);
-
             using (doc.LockDocument())
             using (Transaction tr = db.TransactionManager.StartTransaction())
             {
-                MarkerDrawer.Draw(tr, db, pts, opt.TextHeight, opt.LabelOffset, marker, opt.MarkerSize);
+                MarkerDrawer.Draw(tr, db, pts, opt.TextHeight, opt.LabelOffset, opt.Marker, opt.MarkerSize);
                 TableBuilder.Build(tr, db, pts, loc, opt);
                 tr.Commit();
             }
 
-            ed.WriteMessage("\n" + pts.Count + " ta nuqta uchun jadval yaratildi.");
+            ed.WriteMessage("\n" + pts.Count + " ta nuqta uchun jadval yaratildi. "
+                          + "(Sozlamalar: PTSOZLAMA)");
         }
     }
 }

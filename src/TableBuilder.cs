@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Globalization;
 using Autodesk.AutoCAD.DatabaseServices;
@@ -6,16 +7,10 @@ using Autodesk.AutoCAD.Geometry;
 namespace SalohiyatDP.AutoCADTable
 {
     /// <summary>
-    /// Nuqtalar bo'yicha jadvalni CHIZIQ va MATN yordamida qo'lda chizadi
-    /// (AutoCAD Table obyekti o'rniga), shunda qator balandligi matnga aniq mos keladi.
-    /// Jadval ostiga yer maydoni (m.kv, ga) va chegara uzunligi yoziladi.
-    ///
-    /// Tuzilishi (rasmga mos):
-    ///   Sarlavha: | Nuqtalar №  |            Geo ma'lumotlar           |
-    ///             |             | Uzunligi(m) |     X      |     Y     |
-    ///   Har bir nuqta:  [№] [ - ] [X] [Y]
-    ///   Har bir segment: [ - ] [masofa] [ - ] [ - ]
-    ///   Yopiq kontur uchun oxirida 1-nuqta koordinatalari takrorlanadi.
+    /// Nuqtalar bo'yicha jadvalni CHIZIQ va MATN yordamida qo'lda chizadi.
+    /// Qator balandligi matn balandligiga, ustun kengligi esa katakdagi eng uzun
+    /// matnga moslashadi (auto-fit). Jadval ostiga yer maydoni va chegara uzunligi yoziladi.
+    /// (Mualliflar bloki jadvalda emas — menyudagi "Haqida" bo'limida.)
     /// </summary>
     internal static class TableBuilder
     {
@@ -27,20 +22,45 @@ namespace SalohiyatDP.AutoCADTable
 
             int segments = closed ? n : (n - 1);
             int dataRows = n + segments + (closed ? 1 : 0);
-            int totalRows = 2 + dataRows; // 2 ta sarlavha qatori
+            int totalRows = 2 + dataRows;
 
             double rh = opt.RowHeight;
             double th = opt.TextHeight;
 
-            // Ustunlarning X chegaralari
+            // ---- Ustun kengliklarini matnga moslash ----
+            double w0 = TextWidth("Nuqtalar №", opt);
+            double w1 = TextWidth("Uzunligi(m)", opt);
+            double w2 = TextWidth("X", opt);
+            double w3 = TextWidth("Y", opt);
+
+            for (int i = 0; i < n; i++)
+            {
+                w0 = Math.Max(w0, TextWidth((i + 1).ToString(), opt));
+                w2 = Math.Max(w2, TextWidth(pts[i].X.ToString(opt.CoordFormat, ci), opt));
+                w3 = Math.Max(w3, TextWidth(pts[i].Y.ToString(opt.CoordFormat, ci), opt));
+
+                Point2d next = (i < n - 1) ? pts[i + 1] : pts[0];
+                if ((i < n - 1) || closed)
+                    w1 = Math.Max(w1, TextWidth(pts[i].GetDistanceTo(next).ToString(opt.LenFormat, ci), opt));
+            }
+
+            // "Geo ma'lumotlar" sarlavhasi 1..3 ustunlarga sig'sin
+            double geoWidth = TextWidth("Geo ma'lumotlar", opt);
+            double sum123 = w1 + w2 + w3;
+            if (sum123 < geoWidth)
+            {
+                double add = (geoWidth - sum123) / 3.0;
+                w1 += add; w2 += add; w3 += add;
+            }
+
+            // ---- Chegaralar ----
             double[] X = new double[5];
             X[0] = loc.X;
-            X[1] = X[0] + opt.ColTR;
-            X[2] = X[1] + opt.ColLen;
-            X[3] = X[2] + opt.ColX;
-            X[4] = X[3] + opt.ColY;
+            X[1] = X[0] + w0;
+            X[2] = X[1] + w1;
+            X[3] = X[2] + w2;
+            X[4] = X[3] + w3;
 
-            // Qatorlarning Y chegaralari (yuqoridan pastga)
             double[] Y = new double[totalRows + 1];
             for (int k = 0; k <= totalRows; k++)
                 Y[k] = loc.Y - k * rh;
@@ -49,22 +69,20 @@ namespace SalohiyatDP.AutoCADTable
             var ms = (BlockTableRecord)tr.GetObject(bt[BlockTableRecord.ModelSpace], OpenMode.ForWrite);
 
             // ---- Chiziqlar ----
-            // Vertikal chiziqlar
-            AddLine(tr, ms, X[0], Y[0], X[0], Y[totalRows]);          // chap chegara
-            AddLine(tr, ms, X[1], Y[0], X[1], Y[totalRows]);          // № | Geo
-            AddLine(tr, ms, X[2], Y[1], X[2], Y[totalRows]);          // Uzunligi | X  (0-qatorda yo'q - Geo birlashgan)
-            AddLine(tr, ms, X[3], Y[1], X[3], Y[totalRows]);          // X | Y          (0-qatorda yo'q)
-            AddLine(tr, ms, X[4], Y[0], X[4], Y[totalRows]);          // o'ng chegara
+            AddLine(tr, ms, X[0], Y[0], X[0], Y[totalRows]);
+            AddLine(tr, ms, X[1], Y[0], X[1], Y[totalRows]);
+            AddLine(tr, ms, X[2], Y[1], X[2], Y[totalRows]); // 0-qatorda yo'q (Geo birlashgan)
+            AddLine(tr, ms, X[3], Y[1], X[3], Y[totalRows]);
+            AddLine(tr, ms, X[4], Y[0], X[4], Y[totalRows]);
 
-            // Gorizontal chiziqlar
-            AddLine(tr, ms, X[0], Y[0], X[4], Y[0]);                  // yuqori chegara
-            AddLine(tr, ms, X[1], Y[1], X[4], Y[1]);                  // sarlavha 1|2 (0-ustunda yo'q - № birlashgan)
+            AddLine(tr, ms, X[0], Y[0], X[4], Y[0]);
+            AddLine(tr, ms, X[1], Y[1], X[4], Y[1]);          // 0-ustunda yo'q (№ birlashgan)
             for (int k = 2; k <= totalRows; k++)
-                AddLine(tr, ms, X[0], Y[k], X[4], Y[k]);              // qolgan barcha qatorlar
+                AddLine(tr, ms, X[0], Y[k], X[4], Y[k]);
 
             // ---- Sarlavha matnlari ----
-            AddText(tr, ms, "Nuqtalar №", Mid(X[0], X[1]), Mid(Y[0], Y[2]), th);       // 2 qatorga birlashgan
-            AddText(tr, ms, "Geo ma'lumotlar", Mid(X[1], X[4]), Mid(Y[0], Y[1]), th);  // 3 ustunga birlashgan
+            AddText(tr, ms, "Nuqtalar №", Mid(X[0], X[1]), Mid(Y[0], Y[2]), th);
+            AddText(tr, ms, "Geo ma'lumotlar", Mid(X[1], X[4]), Mid(Y[0], Y[1]), th);
             AddText(tr, ms, "Uzunligi(m)", Mid(X[1], X[2]), Mid(Y[1], Y[2]), th);
             AddText(tr, ms, "X", Mid(X[2], X[3]), Mid(Y[1], Y[2]), th);
             AddText(tr, ms, "Y", Mid(X[3], X[4]), Mid(Y[1], Y[2]), th);
@@ -73,13 +91,11 @@ namespace SalohiyatDP.AutoCADTable
             int row = 2;
             for (int i = 0; i < n; i++)
             {
-                // Nuqta qatori
                 AddText(tr, ms, (i + 1).ToString(), Mid(X[0], X[1]), Mid(Y[row], Y[row + 1]), th);
                 AddText(tr, ms, pts[i].X.ToString(opt.CoordFormat, ci), Mid(X[2], X[3]), Mid(Y[row], Y[row + 1]), th);
                 AddText(tr, ms, pts[i].Y.ToString(opt.CoordFormat, ci), Mid(X[3], X[4]), Mid(Y[row], Y[row + 1]), th);
                 row++;
 
-                // Masofa qatori (shu nuqtadan keyingisigacha)
                 bool hasNext = (i < n - 1) || closed;
                 if (hasNext)
                 {
@@ -90,7 +106,6 @@ namespace SalohiyatDP.AutoCADTable
                 }
             }
 
-            // Yopuvchi qator: 1-nuqta koordinatalari qayta ko'rsatiladi
             if (closed)
             {
                 AddText(tr, ms, "1", Mid(X[0], X[1]), Mid(Y[row], Y[row + 1]), th);
@@ -112,6 +127,13 @@ namespace SalohiyatDP.AutoCADTable
             double bottomY = Y[totalRows];
             AddText(tr, ms, s1, cx, bottomY - rh * 1.2, th);
             AddText(tr, ms, s2, cx, bottomY - rh * 1.2 - th * 1.8, th);
+        }
+
+        private static double TextWidth(string s, TableOptions opt)
+        {
+            int len = string.IsNullOrEmpty(s) ? 0 : s.Length;
+            double w = len * opt.CharWidth + 2.0 * opt.ColPadding;
+            return Math.Max(w, opt.MinColWidth);
         }
 
         private static double Mid(double a, double b) => (a + b) / 2.0;
