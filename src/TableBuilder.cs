@@ -6,74 +6,77 @@ using Autodesk.AutoCAD.Geometry;
 namespace SalohiyatDP.AutoCADTable
 {
     /// <summary>
-    /// Nuqtalar bo'yicha AutoCAD Table obyektini yasaydi va uning ostiga
-    /// yer maydoni (m.kv, ga) hamda chegara uzunligi matnini qo'yadi.
+    /// Nuqtalar bo'yicha jadvalni CHIZIQ va MATN yordamida qo'lda chizadi
+    /// (AutoCAD Table obyekti o'rniga), shunda qator balandligi matnga aniq mos keladi.
+    /// Jadval ostiga yer maydoni (m.kv, ga) va chegara uzunligi yoziladi.
     ///
-    /// Jadval tuzilishi (rasmga mos):
-    ///   Sarlavha 1: | Nuqtalar №   |           Geo ma'lumotlar           |
-    ///   Sarlavha 2: |              | Uzunligi(m) |     X     |     Y      |
-    ///   Har bir nuqta ikki qatordan iborat:
-    ///     - nuqta qatori:  [T/R] [ - ] [X] [Y]
-    ///     - masofa qatori: [ - ] [shu nuqtadan keyingisigacha masofa] [ - ] [ - ]
-    ///   Yopiq kontur uchun oxirida 1-nuqta koordinatalari yana takrorlanadi.
+    /// Tuzilishi (rasmga mos):
+    ///   Sarlavha: | Nuqtalar №  |            Geo ma'lumotlar           |
+    ///             |             | Uzunligi(m) |     X      |     Y     |
+    ///   Har bir nuqta:  [№] [ - ] [X] [Y]
+    ///   Har bir segment: [ - ] [masofa] [ - ] [ - ]
+    ///   Yopiq kontur uchun oxirida 1-nuqta koordinatalari takrorlanadi.
     /// </summary>
     internal static class TableBuilder
     {
-        public static Table Build(Transaction tr, Database db, IList<Point2d> pts, Point3d loc, TableOptions opt)
+        public static void Build(Transaction tr, Database db, IList<Point2d> pts, Point3d loc, TableOptions opt)
         {
             int n = pts.Count;
             bool closed = n >= 3;
             var ci = CultureInfo.InvariantCulture;
 
-            // Qatorlar soni:
-            //   2 ta sarlavha + har nuqta uchun 1 qator + har segment uchun 1 masofa qatori
-            //   + yopiq bo'lsa 1 ta yopuvchi (1-nuqta) qatori.
             int segments = closed ? n : (n - 1);
             int dataRows = n + segments + (closed ? 1 : 0);
-            int totalRows = 2 + dataRows;
+            int totalRows = 2 + dataRows; // 2 ta sarlavha qatori
 
-            var tb = new Table();
-            tb.TableStyle = db.Tablestyle;
-            tb.Position = loc;
-            tb.SetSize(totalRows, 4);
+            double rh = opt.RowHeight;
+            double th = opt.TextHeight;
 
-            // Katak chekkalarini (margin) kichraytiramiz -> qator balandligi matnga moslashadi.
-            // Bu xossalar "obsolete" deb belgilangan, lekin AutoCAD 2021 da ishlaydi.
-#pragma warning disable CS0618
-            tb.HorizontalCellMargin = opt.HMargin;
-            tb.VerticalCellMargin = opt.VMargin;
-#pragma warning restore CS0618
+            // Ustunlarning X chegaralari
+            double[] X = new double[5];
+            X[0] = loc.X;
+            X[1] = X[0] + opt.ColTR;
+            X[2] = X[1] + opt.ColLen;
+            X[3] = X[2] + opt.ColX;
+            X[4] = X[3] + opt.ColY;
 
-            tb.Columns[0].Width = opt.ColTR;
-            tb.Columns[1].Width = opt.ColLen;
-            tb.Columns[2].Width = opt.ColX;
-            tb.Columns[3].Width = opt.ColY;
-            for (int r = 0; r < totalRows; r++)
-                tb.Rows[r].Height = opt.RowHeight;
+            // Qatorlarning Y chegaralari (yuqoridan pastga)
+            double[] Y = new double[totalRows + 1];
+            for (int k = 0; k <= totalRows; k++)
+                Y[k] = loc.Y - k * rh;
 
-            // STANDARD jadval uslubida 0-qator (Title) barcha ustunlar bo'yicha
-            // avtomatik birlashtirilgan bo'ladi. Bu bizning birlashmalarga xalaqit
-            // beradi va eInvalidInput xatosini keltirib chiqaradi. Shuning uchun
-            // avval mavjud birlashmani yechib olamiz.
-            UnmergeIfMerged(tb, 0, 0);
+            var bt = (BlockTable)tr.GetObject(db.BlockTableId, OpenMode.ForRead);
+            var ms = (BlockTableRecord)tr.GetObject(bt[BlockTableRecord.ModelSpace], OpenMode.ForWrite);
 
-            // Sarlavha kataklarini birlashtirish (xavfsiz - xato bo'lsa jadval baribir yasaladi)
-            TryMerge(tb, 0, 0, 1, 0); // "Nuqtalar T/R" vertikal
-            TryMerge(tb, 0, 1, 0, 3); // "Geomalumotlar" gorizontal
+            // ---- Chiziqlar ----
+            // Vertikal chiziqlar
+            AddLine(tr, ms, X[0], Y[0], X[0], Y[totalRows]);          // chap chegara
+            AddLine(tr, ms, X[1], Y[0], X[1], Y[totalRows]);          // № | Geo
+            AddLine(tr, ms, X[2], Y[1], X[2], Y[totalRows]);          // Uzunligi | X  (0-qatorda yo'q - Geo birlashgan)
+            AddLine(tr, ms, X[3], Y[1], X[3], Y[totalRows]);          // X | Y          (0-qatorda yo'q)
+            AddLine(tr, ms, X[4], Y[0], X[4], Y[totalRows]);          // o'ng chegara
 
-            SetCell(tb, 0, 0, "Nuqtalar №", opt.TextHeight);
-            SetCell(tb, 0, 1, "Geo ma'lumotlar", opt.TextHeight);
-            SetCell(tb, 1, 1, "Uzunligi(m)", opt.TextHeight);
-            SetCell(tb, 1, 2, "X", opt.TextHeight);
-            SetCell(tb, 1, 3, "Y", opt.TextHeight);
+            // Gorizontal chiziqlar
+            AddLine(tr, ms, X[0], Y[0], X[4], Y[0]);                  // yuqori chegara
+            AddLine(tr, ms, X[1], Y[1], X[4], Y[1]);                  // sarlavha 1|2 (0-ustunda yo'q - № birlashgan)
+            for (int k = 2; k <= totalRows; k++)
+                AddLine(tr, ms, X[0], Y[k], X[4], Y[k]);              // qolgan barcha qatorlar
 
+            // ---- Sarlavha matnlari ----
+            AddText(tr, ms, "Nuqtalar №", Mid(X[0], X[1]), Mid(Y[0], Y[2]), th);       // 2 qatorga birlashgan
+            AddText(tr, ms, "Geo ma'lumotlar", Mid(X[1], X[4]), Mid(Y[0], Y[1]), th);  // 3 ustunga birlashgan
+            AddText(tr, ms, "Uzunligi(m)", Mid(X[1], X[2]), Mid(Y[1], Y[2]), th);
+            AddText(tr, ms, "X", Mid(X[2], X[3]), Mid(Y[1], Y[2]), th);
+            AddText(tr, ms, "Y", Mid(X[3], X[4]), Mid(Y[1], Y[2]), th);
+
+            // ---- Ma'lumot qatorlari ----
             int row = 2;
             for (int i = 0; i < n; i++)
             {
                 // Nuqta qatori
-                SetCell(tb, row, 0, (i + 1).ToString(), opt.TextHeight);
-                SetCell(tb, row, 2, pts[i].X.ToString(opt.CoordFormat, ci), opt.TextHeight);
-                SetCell(tb, row, 3, pts[i].Y.ToString(opt.CoordFormat, ci), opt.TextHeight);
+                AddText(tr, ms, (i + 1).ToString(), Mid(X[0], X[1]), Mid(Y[row], Y[row + 1]), th);
+                AddText(tr, ms, pts[i].X.ToString(opt.CoordFormat, ci), Mid(X[2], X[3]), Mid(Y[row], Y[row + 1]), th);
+                AddText(tr, ms, pts[i].Y.ToString(opt.CoordFormat, ci), Mid(X[3], X[4]), Mid(Y[row], Y[row + 1]), th);
                 row++;
 
                 // Masofa qatori (shu nuqtadan keyingisigacha)
@@ -82,7 +85,7 @@ namespace SalohiyatDP.AutoCADTable
                 {
                     Point2d next = (i < n - 1) ? pts[i + 1] : pts[0];
                     double d = pts[i].GetDistanceTo(next);
-                    SetCell(tb, row, 1, d.ToString(opt.LenFormat, ci), opt.TextHeight);
+                    AddText(tr, ms, d.ToString(opt.LenFormat, ci), Mid(X[1], X[2]), Mid(Y[row], Y[row + 1]), th);
                     row++;
                 }
             }
@@ -90,20 +93,13 @@ namespace SalohiyatDP.AutoCADTable
             // Yopuvchi qator: 1-nuqta koordinatalari qayta ko'rsatiladi
             if (closed)
             {
-                SetCell(tb, row, 0, "1", opt.TextHeight);
-                SetCell(tb, row, 2, pts[0].X.ToString(opt.CoordFormat, ci), opt.TextHeight);
-                SetCell(tb, row, 3, pts[0].Y.ToString(opt.CoordFormat, ci), opt.TextHeight);
+                AddText(tr, ms, "1", Mid(X[0], X[1]), Mid(Y[row], Y[row + 1]), th);
+                AddText(tr, ms, pts[0].X.ToString(opt.CoordFormat, ci), Mid(X[2], X[3]), Mid(Y[row], Y[row + 1]), th);
+                AddText(tr, ms, pts[0].Y.ToString(opt.CoordFormat, ci), Mid(X[3], X[4]), Mid(Y[row], Y[row + 1]), th);
                 row++;
             }
 
-            tb.GenerateLayout();
-
-            var bt = (BlockTable)tr.GetObject(db.BlockTableId, OpenMode.ForRead);
-            var ms = (BlockTableRecord)tr.GetObject(bt[BlockTableRecord.ModelSpace], OpenMode.ForWrite);
-            ms.AppendEntity(tb);
-            tr.AddNewlyCreatedDBObject(tb, true);
-
-            // Jadval ostidagi xulosa matni
+            // ---- Jadval ostidagi xulosa ----
             double area = GeometryHelper.Area(pts);
             double perim = GeometryHelper.Perimeter(pts, closed);
             double ha = area / 10000.0;
@@ -112,64 +108,33 @@ namespace SalohiyatDP.AutoCADTable
                         " m.kv (" + ha.ToString(opt.HaFormat, ci) + " ga)";
             string s2 = "Chegara uzunligi: " + perim.ToString(opt.LenFormat, ci) + " m";
 
-            double tableWidth = opt.ColTR + opt.ColLen + opt.ColX + opt.ColY;
-            double bottomY = loc.Y - tb.Height;
-            double cx = loc.X + tableWidth / 2.0;
-            double gap = opt.RowHeight;
-
-            AddCenteredText(tr, ms, s1, new Point3d(cx, bottomY - gap, 0.0), opt.TextHeight);
-            AddCenteredText(tr, ms, s2, new Point3d(cx, bottomY - gap - opt.TextHeight * 1.8, 0.0), opt.TextHeight);
-
-            return tb;
+            double cx = Mid(X[0], X[4]);
+            double bottomY = Y[totalRows];
+            AddText(tr, ms, s1, cx, bottomY - rh * 1.2, th);
+            AddText(tr, ms, s2, cx, bottomY - rh * 1.2 - th * 1.8, th);
         }
 
-        private static void SetCell(Table tb, int r, int c, string text, double textHeight)
+        private static double Mid(double a, double b) => (a + b) / 2.0;
+
+        private static void AddLine(Transaction tr, BlockTableRecord ms, double x1, double y1, double x2, double y2)
         {
-            Cell cell = tb.Cells[r, c];
-            cell.TextString = text;
-            cell.Alignment = CellAlignment.MiddleCenter;
-            cell.TextHeight = textHeight;
+            var ln = new Line(new Point3d(x1, y1, 0.0), new Point3d(x2, y2, 0.0));
+            ms.AppendEntity(ln);
+            tr.AddNewlyCreatedDBObject(ln, true);
         }
 
-        /// <summary>Katakda birlashma bo'lsa, uni yechadi (masalan, standart Title qatori).</summary>
-        private static void UnmergeIfMerged(Table tb, int r, int c)
-        {
-            try
-            {
-                CellRange range = tb.Cells[r, c].GetMergeRange();
-                if (range != null)
-                    tb.UnmergeCells(range);
-            }
-            catch
-            {
-                // Birlashma bo'lmasa yoki API farq qilsa - e'tiborsiz.
-            }
-        }
-
-        /// <summary>Kataklarni xavfsiz birlashtiradi: xato bo'lsa jadval yasalishi to'xtamaydi.</summary>
-        private static void TryMerge(Table tb, int topRow, int leftCol, int bottomRow, int rightCol)
-        {
-            try
-            {
-                tb.MergeCells(CellRange.Create(tb, topRow, leftCol, bottomRow, rightCol));
-            }
-            catch
-            {
-                // Birlashtirib bo'lmasa - kataklar alohida qoladi (jadval baribir to'g'ri).
-            }
-        }
-
-        private static void AddCenteredText(Transaction tr, BlockTableRecord ms, string text, Point3d pos, double textHeight)
+        /// <summary>Matnni berilgan nuqtada gorizontal va vertikal markazlab qo'yadi.</summary>
+        private static void AddText(Transaction tr, BlockTableRecord ms, string text, double cx, double cy, double textHeight)
         {
             var t = new DBText
             {
                 TextString = text,
                 Height = textHeight,
-                Position = pos,
                 HorizontalMode = TextHorizontalMode.TextCenter,
-                VerticalMode = TextVerticalMode.TextBase
+                VerticalMode = TextVerticalMode.TextVerticalMid,
+                Position = new Point3d(cx, cy, 0.0)
             };
-            t.AlignmentPoint = pos;
+            t.AlignmentPoint = new Point3d(cx, cy, 0.0);
             ms.AppendEntity(t);
             tr.AddNewlyCreatedDBObject(t, true);
         }
