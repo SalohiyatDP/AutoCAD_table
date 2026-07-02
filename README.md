@@ -95,7 +95,8 @@ Buyurtmachi:                        __________________________
 **Sozlamalarda** (`PTSOZLAMA`) chegaradoshlar jadvali uchun quyidagilar bor:
 - **Ijrochi** — ismi (jadval ustida ko'rsatiladi, saqlanadi).
 - **Chegaradoshlar burchagi** — bu jadval qaysi burchagidan qo'yilishi (asosiy jadvaldan mustaqil).
-- **Chegaradoshlar ustuni (×h)** — "Chegaradoshlar" ustuni kengligi (matn balandligiga nisbatan koeffitsient).
+- **Chegaradosh matn balandligi** — chegaradoshlar jadvali uchun alohida matn balandligi (asosiy jadvaldan mustaqil).
+- **Chegaradosh ustuni (×h)** — "Chegaradoshlar" ustuni kengligi (matn balandligiga nisbatan koeffitsient).
 
 **Buyurtmachi** satri va har bir "Chegaradoshlar" katagi tag chiziq (`___`) bilan chiziladi —
 matnni ustiga bosib (double-click) qo'lda yozish oson bo'lishi uchun.

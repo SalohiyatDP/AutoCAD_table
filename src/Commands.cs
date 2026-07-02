@@ -153,7 +153,7 @@ namespace SalohiyatDP.AutoCADTable
         private static void RunNeighbors(AcadDoc doc, Editor ed, Database db, List<Point2d> pts)
         {
             PluginSettings s = PluginSettings.Load();
-            TableOptions opt = TableOptions.FromSettings(s);
+            TableOptions opt = TableOptions.FromSettingsForNeighbors(s);
 
             var ppo = new PromptPointOptions("\nChegaradoshlar jadvali joyini ko'rsating (tanlangan burchak): ");
             PromptPointResult ppr = ed.GetPoint(ppo);

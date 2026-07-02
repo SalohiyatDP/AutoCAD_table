@@ -31,10 +31,22 @@ namespace SalohiyatDP.AutoCADTable
         public string AreaFormat = "0.00";
         public string HaFormat = "0.00";
 
-        /// <summary>Saqlangan sozlamalardan TableOptions yasaydi.</summary>
+        /// <summary>Koordinata jadvali uchun (asosiy matn balandligi).</summary>
         public static TableOptions FromSettings(PluginSettings s)
         {
             double th = (s.TextHeight <= 0) ? 2.5 : s.TextHeight;
+            return Create(s, th);
+        }
+
+        /// <summary>Chegaradoshlar jadvali uchun (alohida matn balandligi).</summary>
+        public static TableOptions FromSettingsForNeighbors(PluginSettings s)
+        {
+            double th = (s.NeighborsTextHeight <= 0) ? ((s.TextHeight <= 0) ? 2.5 : s.TextHeight) : s.NeighborsTextHeight;
+            return Create(s, th);
+        }
+
+        private static TableOptions Create(PluginSettings s, double th)
+        {
             string fmt = s.NumberFormat();
 
             return new TableOptions

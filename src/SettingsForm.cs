@@ -19,6 +19,7 @@ namespace SalohiyatDP.AutoCADTable
         private ComboBox _cmbAnchor;
         private ComboBox _cmbNeighborsAnchor;
         private NumericUpDown _numNeighborsWidth;
+        private TextBox _txtNeighborsHeight;
         private TextBox _txtIjrochi;
 
         public SettingsForm(PluginSettings settings)
@@ -35,11 +36,11 @@ namespace SalohiyatDP.AutoCADTable
             StartPosition = FormStartPosition.CenterScreen;
             MaximizeBox = false;
             MinimizeBox = false;
-            ClientSize = new Size(470, 330);
+            ClientSize = new Size(500, 366);
             Font = new Font("Segoe UI", 9F);
 
             int labelX = 15;
-            int inputX = 200;
+            int inputX = 220;
             int y = 20;
             int step = 34;
 
@@ -71,21 +72,26 @@ namespace SalohiyatDP.AutoCADTable
             Controls.Add(_cmbNeighborsAnchor);
             y += step;
 
-            AddLabel("Chegaradoshlar ustuni (×h):", labelX, y + 3);
+            AddLabel("Chegaradosh matn balandligi:", labelX, y + 3);
+            _txtNeighborsHeight = new TextBox { Left = inputX, Top = y, Width = 120 };
+            Controls.Add(_txtNeighborsHeight);
+            y += step;
+
+            AddLabel("Chegaradosh ustuni (×h):", labelX, y + 3);
             _numNeighborsWidth = new NumericUpDown { Left = inputX, Top = y, Width = 120, Minimum = 4, Maximum = 80, DecimalPlaces = 0 };
             Controls.Add(_numNeighborsWidth);
             y += step;
 
             AddLabel("Ijrochi:", labelX, y + 3);
-            _txtIjrochi = new TextBox { Left = inputX, Top = y, Width = 250 };
+            _txtIjrochi = new TextBox { Left = inputX, Top = y, Width = 260 };
             Controls.Add(_txtIjrochi);
             y += step + 12;
 
-            var btnOk = new Button { Text = "Saqlash", Left = 280, Top = y, Width = 90, DialogResult = DialogResult.OK };
+            var btnOk = new Button { Text = "Saqlash", Left = 300, Top = y, Width = 90, DialogResult = DialogResult.OK };
             btnOk.Click += OnSave;
             Controls.Add(btnOk);
 
-            var btnCancel = new Button { Text = "Bekor qilish", Left = 375, Top = y, Width = 90, DialogResult = DialogResult.Cancel };
+            var btnCancel = new Button { Text = "Bekor qilish", Left = 395, Top = y, Width = 90, DialogResult = DialogResult.Cancel };
             Controls.Add(btnCancel);
 
             AcceptButton = btnOk;
@@ -104,6 +110,7 @@ namespace SalohiyatDP.AutoCADTable
             _cmbMarker.SelectedIndex = (int)_s.Marker;
             _cmbAnchor.SelectedIndex = (int)_s.Anchor;
             _cmbNeighborsAnchor.SelectedIndex = (int)_s.NeighborsAnchor;
+            _txtNeighborsHeight.Text = _s.NeighborsTextHeight.ToString(CultureInfo.InvariantCulture);
             _numNeighborsWidth.Value = (decimal)Math.Max(4.0, Math.Min(80.0, _s.NeighborsColWidthFactor));
             _txtIjrochi.Text = _s.Ijrochi;
         }
@@ -120,11 +127,22 @@ namespace SalohiyatDP.AutoCADTable
                 return;
             }
 
+            double nh;
+            if (!double.TryParse(_txtNeighborsHeight.Text.Replace(',', '.'),
+                    NumberStyles.Float, CultureInfo.InvariantCulture, out nh) || nh <= 0)
+            {
+                MessageBox.Show("Chegaradosh matn balandligi musbat son bo'lishi kerak.", "Xatolik",
+                    MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                DialogResult = DialogResult.None;
+                return;
+            }
+
             _s.TextHeight = h;
             _s.Decimals = (int)_numDecimals.Value;
             _s.Marker = (MarkerType)_cmbMarker.SelectedIndex;
             _s.Anchor = (TableAnchor)_cmbAnchor.SelectedIndex;
             _s.NeighborsAnchor = (TableAnchor)_cmbNeighborsAnchor.SelectedIndex;
+            _s.NeighborsTextHeight = nh;
             _s.NeighborsColWidthFactor = (double)_numNeighborsWidth.Value;
             _s.Ijrochi = _txtIjrochi.Text.Trim();
             _s.Save();

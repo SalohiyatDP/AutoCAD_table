@@ -53,6 +53,9 @@ namespace SalohiyatDP.AutoCADTable
         // Chegaradoshlar jadvali uchun ijrochi ma'lumoti
         public string Ijrochi { get; set; } = "Karimbekov Asadbek Nasibbek o'g'li";
 
+        // Chegaradoshlar jadvali uchun alohida matn balandligi
+        public double NeighborsTextHeight { get; set; } = 2.5;
+
         // Chegaradoshlar ("Chegaradoshlar" ustuni) kengligi - matn balandligiga nisbatan
         public double NeighborsColWidthFactor { get; set; } = 16.0;
 
