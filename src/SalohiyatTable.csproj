@@ -14,31 +14,62 @@
     <Product>SalohiyatTable</Product>
     <Description>AutoCAD uchun nuqtalarni raqamlab koordinata/masofa jadvali yasovchi plagin</Description>
 
+    <!-- Plaginlar uchun keraksiz papkalarni chiqarmaslik -->
+    <AppendRuntimeIdentifierToOutputPath>false</AppendRuntimeIdentifierToOutputPath>
+    <CopyLocalLockFileAssemblies>false</CopyLocalLockFileAssemblies>
+
     <!--
-      AutoCAD o'rnatilgan papka. Kerak bo'lsa o'z versiyangizga moslang, masalan:
-        C:\Program Files\Autodesk\AutoCAD 2022
-      yoki buildda: msbuild /p:AutoCADPath="C:\Program Files\Autodesk\AutoCAD 2025"
+      ============================================================
+      AutoCAD .NET API versiyasi (NuGet paketi "AutoCAD.NET").
+      MUHIM: bu versiya sizdagi AutoCAD versiyasidan KATTA bo'lmasin.
+      Quyidagi jadvalga qarab tanlang (o'z versiyangizga yoki undan pastroq):
+        AutoCAD 2019 -> 23.0.0
+        AutoCAD 2020 -> 23.1.0
+        AutoCAD 2021 -> 24.0.0
+        AutoCAD 2022 -> 24.1.0
+        AutoCAD 2023 -> 24.2.0
+        AutoCAD 2024 -> 24.3.0
+        AutoCAD 2025 -> 25.0.0   (bu holda TargetFramework ni net8.0-windows qiling)
+      Past versiyaga qurilgan plagin yuqori AutoCAD'da ham ishlaydi.
+      ============================================================
     -->
-    <AutoCADPath Condition="'$(AutoCADPath)' == ''">C:\Program Files\Autodesk\AutoCAD 2024</AutoCADPath>
+    <AcadNetVersion Condition="'$(AcadNetVersion)' == ''">23.1.0</AcadNetVersion>
   </PropertyGroup>
 
   <!--
-    AutoCAD ObjectARX (managed) referenslar.
-    Bu DLL'lar AutoCAD ishlashda yuklaydi, shuning uchun CopyLocal = false (Private=false).
+    AutoCAD ObjectARX (managed) sborkalari NuGet orqali olinadi.
+    ExcludeAssets=runtime -> DLL'lar chiqishga nusxalanmaydi (ular AutoCAD'da mavjud).
   -->
   <ItemGroup>
-    <Reference Include="acmgd">
-      <HintPath>$(AutoCADPath)\acmgd.dll</HintPath>
-      <Private>false</Private>
-    </Reference>
-    <Reference Include="acdbmgd">
-      <HintPath>$(AutoCADPath)\acdbmgd.dll</HintPath>
-      <Private>false</Private>
-    </Reference>
-    <Reference Include="accoremgd">
-      <HintPath>$(AutoCADPath)\accoremgd.dll</HintPath>
-      <Private>false</Private>
-    </Reference>
+    <PackageReference Include="AutoCAD.NET" Version="$(AcadNetVersion)">
+      <ExcludeAssets>runtime</ExcludeAssets>
+    </PackageReference>
   </ItemGroup>
+
+  <!--
+    ============================================================================
+    MUQOBIL USUL (agar NuGet ishlatmoqchi bo'lmasangiz):
+    Yuqoridagi <ItemGroup> ni o'chirib, quyidagini yoqing va AutoCADPath ni
+    o'z o'rnatilgan papkangizga moslang.
+    ============================================================================
+
+    <PropertyGroup>
+      <AutoCADPath>C:\Program Files\Autodesk\AutoCAD 2024</AutoCADPath>
+    </PropertyGroup>
+    <ItemGroup>
+      <Reference Include="acmgd">
+        <HintPath>$(AutoCADPath)\acmgd.dll</HintPath>
+        <Private>false</Private>
+      </Reference>
+      <Reference Include="acdbmgd">
+        <HintPath>$(AutoCADPath)\acdbmgd.dll</HintPath>
+        <Private>false</Private>
+      </Reference>
+      <Reference Include="accoremgd">
+        <HintPath>$(AutoCADPath)\accoremgd.dll</HintPath>
+        <Private>false</Private>
+      </Reference>
+    </ItemGroup>
+  -->
 
 </Project>

@@ -56,24 +56,49 @@ Talablar:
 - Windows + o'rnatilgan **AutoCAD** (2019+ tavsiya etiladi).
 - **.NET Framework 4.8** SDK va **Visual Studio 2019/2022** yoki `dotnet` / `msbuild`.
 
-Loyiha AutoCAD'ning boshqariladigan (managed) kutubxonalariga bog'lanadi:
-`acmgd.dll`, `acdbmgd.dll`, `accoremgd.dll` — ular AutoCAD o'rnatilgan papkada bo'ladi.
+Loyiha AutoCAD .NET API (`acmgd`, `acdbmgd`, `accoremgd`) ga bog'lanadi. Bu sborkalar
+**NuGet** paketi `AutoCAD.NET` orqali avtomatik olinadi — AutoCAD o'rnatilgan papkani
+qo'lda ko'rsatish shart emas.
 
-`src/SalohiyatTable.csproj` faylidagi `AutoCADPath` ni o'z versiyangizga moslang
-yoki build vaqtida bering:
+### 1-qadam: AutoCAD versiyangizni tanlang
+
+`src/SalohiyatTable.csproj` faylidagi `AcadNetVersion` ni o'z AutoCAD versiyangizga
+(yoki undan **pastroq**) moslang:
+
+| AutoCAD | `AcadNetVersion` |
+|---------|------------------|
+| 2019 | `23.0.0` |
+| 2020 | `23.1.0` |
+| 2021 | `24.0.0` |
+| 2022 | `24.1.0` |
+| 2023 | `24.2.0` |
+| 2024 | `24.3.0` |
+| 2025 | `25.0.0` (bunda `TargetFramework` ni `net8.0-windows` qiling) |
+
+> Past versiyaga qurilgan plagin yuqori AutoCAD'da ham ishlaydi, teskarisi emas.
+> Standart qiymat: `23.1.0` (AutoCAD 2020), 2020+ larda ishlaydi.
+
+### 2-qadam: Build
 
 **Visual Studio orqali (tavsiya etiladi):**
 1. `SalohiyatTable.sln` faylini Visual Studio'da oching.
-2. Yuqoridagi panelda konfiguratsiyani **Release**, platformani **x64** qilib tanlang.
-3. **Build → Build Solution** (yoki `Ctrl+Shift+B`).
+2. Internet ulanishi bo'lsin — NuGet paketlarini avtomatik tiklaydi (Restore).
+3. Konfiguratsiya = **Release**, platforma = **x64**.
+4. **Build → Build Solution** (yoki `Ctrl+Shift+B`).
 
 **Buyruq qatoridan (msbuild):**
 ```powershell
-msbuild SalohiyatTable.sln /p:Configuration=Release /p:Platform=x64 ^
-        /p:AutoCADPath="C:\Program Files\Autodesk\AutoCAD 2024"
+msbuild SalohiyatTable.sln /t:Restore /p:Configuration=Release /p:Platform=x64
+msbuild SalohiyatTable.sln /p:Configuration=Release /p:Platform=x64
+
+# yoki bitta buyruqda restore bilan:
+dotnet build SalohiyatTable.sln -c Release
 ```
 
 Natijada `SalohiyatTable.dll` hosil bo'ladi (`src\bin\Release\`).
+
+> **NuGet ishlamasa** (internet yo'q / korporativ tarmoq): `csproj` ichidagi izohlangan
+> "MUQOBIL USUL" blokini yoqib, `AutoCADPath` ni o'rnatilgan papkangizga moslang.
 
 > **Eslatma:** `net48` ko'pchilik AutoCAD versiyalari (2019–2024) uchun mos.
 > AutoCAD 2025+ uchun `TargetFramework` ni `net8.0-windows` ga o'zgartiring.
