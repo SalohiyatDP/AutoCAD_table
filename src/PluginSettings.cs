@@ -50,9 +50,11 @@ namespace SalohiyatDP.AutoCADTable
         public TableAnchor Anchor { get; set; } = TableAnchor.TopLeft;
         public TableAnchor NeighborsAnchor { get; set; } = TableAnchor.TopLeft;
 
-        // Chegaradoshlar jadvali uchun ijrochi/buyurtmachi ma'lumoti
+        // Chegaradoshlar jadvali uchun ijrochi ma'lumoti
         public string Ijrochi { get; set; } = "Karimbekov Asadbek Nasibbek o'g'li";
-        public string Buyurtmachi { get; set; } = "";
+
+        // Chegaradoshlar ("Chegaradoshlar" ustuni) kengligi - matn balandligiga nisbatan
+        public double NeighborsColWidthFactor { get; set; } = 16.0;
 
         private static string FilePath
         {

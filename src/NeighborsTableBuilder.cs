@@ -6,10 +6,9 @@ using Autodesk.AutoCAD.Geometry;
 namespace SalohiyatDP.AutoCADTable
 {
     /// <summary>
-    /// "Chegaradoshlar" jadvalini chizadi (rasmga mos ko'rinishda):
-    ///
-    ///   Ijrochi: &lt;ism&gt;            ___________
-    ///   Buyurtmachi:                  ___________
+    /// "Chegaradoshlar" jadvali (rasmga mos):
+    ///   Ijrochi: &lt;ism&gt;      ____________
+    ///   Buyurtmachi: ______________________
     ///   +-------------------------------------------+
     ///   | Yer uchastkasining chegara burulish       |
     ///   |         nuqtalari tasnifi                 |
@@ -18,12 +17,12 @@ namespace SalohiyatDP.AutoCADTable
     ///   +------+--------+     Chegaradoshlar        |
     ///   | dan  | gacha  |                           |
     ///   +------+--------+---------------------------+
-    ///   |  1   |   2    |                           |
-    ///   |  2   |   3    |                           |
-    ///   | ...  |  ...   |                           |
+    ///   |  1   |   2    | ____________              |
+    ///   | ...  |  ...   | ____________              |
     ///
-    /// Jadvalning o'ziga faqat raqamlar qo'yiladi; "Chegaradoshlar" ustuni bo'sh
-    /// (qo'lda to'ldiriladi). Ijrochi/Buyurtmachi ma'lumoti sozlamalardan olinadi.
+    /// Jadvalga faqat raqamlar qo'yiladi. "Chegaradoshlar" kataklariga va
+    /// "Buyurtmachi" satriga qo'lda to'ldirishni osonlashtirish uchun tag chiziq (___)
+    /// qo'yiladi. Sarlavha qatorlari balandligi matnga (o'ralgan satrlarga) moslashadi.
     /// </summary>
     internal static class NeighborsTableBuilder
     {
@@ -35,17 +34,17 @@ namespace SalohiyatDP.AutoCADTable
             if (segCount < 1) return;
 
             double th = opt.TextHeight;
-            double rh = opt.RowHeight;         // oddiy qator (1 satr)
-            double rh2 = th * 2.8;             // ikki satrli qator (sarlavha uchun)
+            double rh = opt.RowHeight;
             double pad = opt.ColPadding;
+            double vpad = th * 0.5;
 
-            // Segment chekkalari (dan, gacha)
+            // Segment chekkalari (dan / gacha)
             var fromNo = new string[segCount];
             var toNo = new string[segCount];
             for (int s = 0; s < segCount; s++)
             {
                 int a = s + 1;
-                int b = (s + 1 < n) ? s + 2 : 1; // yopiq konturda oxirgisi -> 1
+                int b = (s + 1 < n) ? s + 2 : 1;
                 fromNo[s] = a.ToString();
                 toNo[s] = b.ToString();
             }
@@ -58,20 +57,32 @@ namespace SalohiyatDP.AutoCADTable
                 w0 = Math.Max(w0, TextWidth(fromNo[s], opt));
                 w1 = Math.Max(w1, TextWidth(toNo[s], opt));
             }
-            // "Burulish nuqtalari" sarlavhasi ikki ustunga sig'sin (eng uzun so'z: "nuqtalari")
             double needCombined = TextWidth("nuqtalari", opt);
             if (w0 + w1 < needCombined)
             {
                 double add = (needCombined - (w0 + w1)) / 2.0;
                 w0 += add; w1 += add;
             }
-            double w2 = Math.Max(TextWidth("Chegaradoshlar", opt), th * 16.0);
+            // "Chegaradoshlar" ustuni kengligi - sozlamadan
+            double w2 = Math.Max(TextWidth("Chegaradoshlar", opt), opt.NeighborsColWidth);
 
-            int totalRows = 3 + segCount; // 0:tasnif, 1:Burulish nuq./Chegaradoshlar, 2:dan/gacha, 3..:data
             double totalW = w0 + w1 + w2;
-            double totalH = rh2 + rh2 + (segCount + 1) * rh; // 0-qator(rh2)+1-qator(rh2)+ (dan/gacha + data)
 
-            // ---- Boshlanish nuqtasi (tanlangan burchakka moslab) ----
+            var bt = (BlockTable)tr.GetObject(db.BlockTableId, OpenMode.ForRead);
+            var ms = (BlockTableRecord)tr.GetObject(bt[BlockTableRecord.ModelSpace], OpenMode.ForWrite);
+
+            // ---- Sarlavha MText'lari (balandlikni o'lchash uchun oldin qo'shamiz) ----
+            MText titleMt = MakeMText(tr, ms, "Yer uchastkasining chegara burulish nuqtalari tasnifi",
+                                      totalW - 2 * pad, th);
+            MText burMt = MakeMText(tr, ms, "Burulish nuqtalari", (w0 + w1) - 2 * pad, th);
+
+            double rowTitleH = Math.Max(SafeHeight(titleMt) + 2 * vpad, rh);
+            double rowGroupH = Math.Max(SafeHeight(burMt) + 2 * vpad, rh);
+
+            int totalRows = 3 + segCount;
+            double totalH = rowTitleH + rowGroupH + (segCount + 1) * rh;
+
+            // ---- Boshlanish nuqtasi (chegaradoshlar burchagi sozlamasi) ----
             double originX = loc.X;
             double originY = loc.Y;
             switch (opt.NeighborsAnchor)
@@ -85,56 +96,61 @@ namespace SalohiyatDP.AutoCADTable
 
             double[] Y = new double[totalRows + 1];
             Y[0] = originY;
-            Y[1] = Y[0] - rh2; // tasnif (sarlavha) qatori
-            Y[2] = Y[1] - rh2; // "Burulish nuqtalari" / "Chegaradoshlar" qatori
+            Y[1] = Y[0] - rowTitleH;
+            Y[2] = Y[1] - rowGroupH;
             for (int k = 3; k <= totalRows; k++)
                 Y[k] = Y[k - 1] - rh;
 
-            var bt = (BlockTable)tr.GetObject(db.BlockTableId, OpenMode.ForRead);
-            var ms = (BlockTableRecord)tr.GetObject(bt[BlockTableRecord.ModelSpace], OpenMode.ForWrite);
-
             // ---- Chiziqlar ----
-            // Vertikal
-            AddLine(tr, ms, X[0], Y[0], X[0], Y[totalRows]);           // chap
-            AddLine(tr, ms, X[1], Y[2], X[1], Y[totalRows]);           // dan|gacha (2-qatordan)
-            AddLine(tr, ms, X[2], Y[1], X[2], Y[totalRows]);           // nuqtalar|Chegaradoshlar (1-qatordan)
-            AddLine(tr, ms, X[3], Y[0], X[3], Y[totalRows]);           // o'ng
-            // Gorizontal
-            AddLine(tr, ms, X[0], Y[0], X[3], Y[0]);                   // yuqori
-            AddLine(tr, ms, X[0], Y[1], X[3], Y[1]);                   // tasnif ostidan
-            AddLine(tr, ms, X[0], Y[2], X[2], Y[2]);                   // Burulish nuq. ostidan (Chegaradoshlar birlashgan)
+            AddLine(tr, ms, X[0], Y[0], X[0], Y[totalRows]);
+            AddLine(tr, ms, X[1], Y[2], X[1], Y[totalRows]);
+            AddLine(tr, ms, X[2], Y[1], X[2], Y[totalRows]);
+            AddLine(tr, ms, X[3], Y[0], X[3], Y[totalRows]);
+
+            AddLine(tr, ms, X[0], Y[0], X[3], Y[0]);
+            AddLine(tr, ms, X[0], Y[1], X[3], Y[1]);
+            AddLine(tr, ms, X[0], Y[2], X[2], Y[2]);
             for (int k = 3; k <= totalRows; k++)
                 AddLine(tr, ms, X[0], Y[k], X[3], Y[k]);
 
-            // ---- Sarlavha matnlari ----
-            AddMText(tr, ms, "Yer uchastkasining chegara burulish nuqtalari tasnifi",
-                     Mid(X[0], X[3]), Mid(Y[0], Y[1]), (X[3] - X[0]) - 2 * pad, th);
-            AddMText(tr, ms, "Burulish nuqtalari",
-                     Mid(X[0], X[2]), Mid(Y[1], Y[2]), (X[2] - X[0]) - 2 * pad, th);
-            AddText(tr, ms, "Chegaradoshlar", Mid(X[2], X[3]), Mid(Y[1], Y[3]), th); // 1-2 qatorga birlashgan
+            // ---- Sarlavha matnlarini joyiga qo'yish ----
+            titleMt.Location = new Point3d(Mid(X[0], X[3]), Mid(Y[0], Y[1]), 0.0);
+            burMt.Location = new Point3d(Mid(X[0], X[2]), Mid(Y[1], Y[2]), 0.0);
+
+            AddText(tr, ms, "Chegaradoshlar", Mid(X[2], X[3]), Mid(Y[1], Y[3]), th);
             AddText(tr, ms, "dan", Mid(X[0], X[1]), Mid(Y[2], Y[3]), th);
             AddText(tr, ms, "gacha", Mid(X[1], X[2]), Mid(Y[2], Y[3]), th);
 
-            // ---- Ma'lumot qatorlari ----
+            // ---- Ma'lumot qatorlari (raqamlar + Chegaradoshlar uchun tag chiziq) ----
+            int fillCount = Math.Max(3, (int)((w2 - 2 * pad) / opt.CharWidth));
+            string fillLine = new string('_', fillCount);
             for (int s = 0; s < segCount; s++)
             {
                 int r = 3 + s;
                 AddText(tr, ms, fromNo[s], Mid(X[0], X[1]), Mid(Y[r], Y[r + 1]), th);
                 AddText(tr, ms, toNo[s], Mid(X[1], X[2]), Mid(Y[r], Y[r + 1]), th);
-                // Chegaradoshlar (X[2]..X[3]) - bo'sh
+                // Chegaradoshlar katagi: chapdan tag chiziq (qo'lda yozish uchun)
+                AddTextLeft(tr, ms, fillLine, X[2] + pad, Mid(Y[r], Y[r + 1]) - th * 0.2, th);
             }
 
-            // ---- Jadval ustidagi Ijrochi / Buyurtmachi satrlari ----
-            double u1 = Y[0] + th * 1.2;               // Buyurtmachi tag chizig'i (jadvalga yaqin)
-            double u2 = u1 + th * 2.0;                 // Ijrochi tag chizig'i (yuqorida)
+            // ---- Jadval ustidagi Ijrochi / Buyurtmachi ----
+            int buyurtFill = Math.Max(5, (int)((totalW - 2 * pad) / opt.CharWidth) - "Buyurtmachi: ".Length);
+            string buyurtLine = new string('_', buyurtFill);
 
-            AddTextLeft(tr, ms, "Buyurtmachi: " + Safe(opt.Buyurtmachi), X[0] + pad, u1 + th * 0.3, th);
-            AddLine(tr, ms, X[0], u1, X[3], u1);
-            AddTextLeft(tr, ms, "Ijrochi: " + Safe(opt.Ijrochi), X[0] + pad, u2 + th * 0.3, th);
-            AddLine(tr, ms, X[0], u2, X[3], u2);
+            double yBuyurt = Y[0] + th * 1.0;                 // jadvalga yaqin
+            double yIjrochi = yBuyurt + th * 2.2;             // yuqorida
+            AddTextLeft(tr, ms, "Buyurtmachi: " + buyurtLine, X[0] + pad, yBuyurt, th);
+            AddTextLeft(tr, ms, "Ijrochi: " + Safe(opt.Ijrochi), X[0] + pad, yIjrochi, th);
+            AddLine(tr, ms, X[0], yIjrochi - th * 0.3, X[3], yIjrochi - th * 0.3); // Ijrochi tag chizig'i
         }
 
         private static string Safe(string s) => string.IsNullOrEmpty(s) ? "" : s;
+
+        private static double SafeHeight(MText mt)
+        {
+            try { double h = mt.ActualHeight; return h > 0 ? h : mt.TextHeight; }
+            catch { return mt.TextHeight; }
+        }
 
         private static double TextWidth(string s, TableOptions opt)
         {
@@ -152,7 +168,6 @@ namespace SalohiyatDP.AutoCADTable
             tr.AddNewlyCreatedDBObject(ln, true);
         }
 
-        /// <summary>Bir qatorli, markazlangan matn.</summary>
         private static void AddText(Transaction tr, BlockTableRecord ms, string text, double cx, double cy, double th)
         {
             var t = new DBText
@@ -168,7 +183,6 @@ namespace SalohiyatDP.AutoCADTable
             tr.AddNewlyCreatedDBObject(t, true);
         }
 
-        /// <summary>Chapga tekislangan matn (Ijrochi/Buyurtmachi uchun).</summary>
         private static void AddTextLeft(Transaction tr, BlockTableRecord ms, string text, double x, double yBase, double th)
         {
             var t = new DBText
@@ -181,19 +195,19 @@ namespace SalohiyatDP.AutoCADTable
             tr.AddNewlyCreatedDBObject(t, true);
         }
 
-        /// <summary>Ko'p qatorli (o'raladigan), markazlangan matn - uzun sarlavhalar uchun.</summary>
-        private static void AddMText(Transaction tr, BlockTableRecord ms, string text, double cx, double cy, double width, double th)
+        private static MText MakeMText(Transaction tr, BlockTableRecord ms, string text, double width, double th)
         {
             var mt = new MText
             {
                 TextHeight = th,
                 Width = width > 0 ? width : 0,
                 Attachment = AttachmentPoint.MiddleCenter,
-                Location = new Point3d(cx, cy, 0.0),
+                Location = new Point3d(0, 0, 0),
                 Contents = text
             };
             ms.AppendEntity(mt);
             tr.AddNewlyCreatedDBObject(mt, true);
+            return mt;
         }
     }
 }

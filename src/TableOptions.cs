@@ -21,9 +21,9 @@ namespace SalohiyatDP.AutoCADTable
         public TableAnchor Anchor;
         public TableAnchor NeighborsAnchor;
 
-        // Chegaradoshlar jadvali sarlavhasi uchun
+        // Chegaradoshlar jadvali uchun
         public string Ijrochi = "";
-        public string Buyurtmachi = "";
+        public double NeighborsColWidth; // "Chegaradoshlar" ustuni kengligi (absolyut)
 
         // Sonlarni formatlash (InvariantCulture bilan)
         public string CoordFormat = "0.00";
@@ -50,7 +50,7 @@ namespace SalohiyatDP.AutoCADTable
                 Anchor = s.Anchor,
                 NeighborsAnchor = s.NeighborsAnchor,
                 Ijrochi = s.Ijrochi,
-                Buyurtmachi = s.Buyurtmachi,
+                NeighborsColWidth = th * (s.NeighborsColWidthFactor > 0 ? s.NeighborsColWidthFactor : 16.0),
                 CoordFormat = fmt,
                 LenFormat = fmt,
                 AreaFormat = fmt,

@@ -18,8 +18,8 @@ namespace SalohiyatDP.AutoCADTable
         private ComboBox _cmbMarker;
         private ComboBox _cmbAnchor;
         private ComboBox _cmbNeighborsAnchor;
+        private NumericUpDown _numNeighborsWidth;
         private TextBox _txtIjrochi;
-        private TextBox _txtBuyurtmachi;
 
         public SettingsForm(PluginSettings settings)
         {
@@ -35,13 +35,13 @@ namespace SalohiyatDP.AutoCADTable
             StartPosition = FormStartPosition.CenterScreen;
             MaximizeBox = false;
             MinimizeBox = false;
-            ClientSize = new Size(470, 356);
+            ClientSize = new Size(470, 330);
             Font = new Font("Segoe UI", 9F);
 
             int labelX = 15;
-            int inputX = 180;
+            int inputX = 200;
             int y = 20;
-            int step = 36;
+            int step = 34;
 
             AddLabel("Matn balandligi:", labelX, y + 3);
             _txtHeight = new TextBox { Left = inputX, Top = y, Width = 120 };
@@ -69,17 +69,17 @@ namespace SalohiyatDP.AutoCADTable
             _cmbNeighborsAnchor = new ComboBox { Left = inputX, Top = y, Width = 200, DropDownStyle = ComboBoxStyle.DropDownList };
             _cmbNeighborsAnchor.Items.AddRange(new object[] { "Chap-yuqori", "O'ng-yuqori", "Chap-pastki", "O'ng-pastki" });
             Controls.Add(_cmbNeighborsAnchor);
-            y += step + 8;
-
-            AddLabel("Ijrochi:", labelX, y + 3);
-            _txtIjrochi = new TextBox { Left = inputX, Top = y, Width = 270 };
-            Controls.Add(_txtIjrochi);
             y += step;
 
-            AddLabel("Buyurtmachi:", labelX, y + 3);
-            _txtBuyurtmachi = new TextBox { Left = inputX, Top = y, Width = 270 };
-            Controls.Add(_txtBuyurtmachi);
-            y += step + 16;
+            AddLabel("Chegaradoshlar ustuni (×h):", labelX, y + 3);
+            _numNeighborsWidth = new NumericUpDown { Left = inputX, Top = y, Width = 120, Minimum = 4, Maximum = 80, DecimalPlaces = 0 };
+            Controls.Add(_numNeighborsWidth);
+            y += step;
+
+            AddLabel("Ijrochi:", labelX, y + 3);
+            _txtIjrochi = new TextBox { Left = inputX, Top = y, Width = 250 };
+            Controls.Add(_txtIjrochi);
+            y += step + 12;
 
             var btnOk = new Button { Text = "Saqlash", Left = 280, Top = y, Width = 90, DialogResult = DialogResult.OK };
             btnOk.Click += OnSave;
@@ -101,11 +101,11 @@ namespace SalohiyatDP.AutoCADTable
         {
             _txtHeight.Text = _s.TextHeight.ToString(CultureInfo.InvariantCulture);
             _numDecimals.Value = Math.Max(0, Math.Min(6, _s.Decimals));
-            _cmbMarker.SelectedIndex = (int)_s.Marker; // None=0, Circle=1, Cross=2
-            _cmbAnchor.SelectedIndex = (int)_s.Anchor; // TopLeft=0 ... BottomRight=3
+            _cmbMarker.SelectedIndex = (int)_s.Marker;
+            _cmbAnchor.SelectedIndex = (int)_s.Anchor;
             _cmbNeighborsAnchor.SelectedIndex = (int)_s.NeighborsAnchor;
+            _numNeighborsWidth.Value = (decimal)Math.Max(4.0, Math.Min(80.0, _s.NeighborsColWidthFactor));
             _txtIjrochi.Text = _s.Ijrochi;
-            _txtBuyurtmachi.Text = _s.Buyurtmachi;
         }
 
         private void OnSave(object sender, EventArgs e)
@@ -125,8 +125,8 @@ namespace SalohiyatDP.AutoCADTable
             _s.Marker = (MarkerType)_cmbMarker.SelectedIndex;
             _s.Anchor = (TableAnchor)_cmbAnchor.SelectedIndex;
             _s.NeighborsAnchor = (TableAnchor)_cmbNeighborsAnchor.SelectedIndex;
+            _s.NeighborsColWidthFactor = (double)_numNeighborsWidth.Value;
             _s.Ijrochi = _txtIjrochi.Text.Trim();
-            _s.Buyurtmachi = _txtBuyurtmachi.Text.Trim();
             _s.Save();
         }
     }

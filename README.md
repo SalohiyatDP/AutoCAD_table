@@ -94,8 +94,12 @@ Buyurtmachi:                        __________________________
 
 **Sozlamalarda** (`PTSOZLAMA`) chegaradoshlar jadvali uchun quyidagilar bor:
 - **Ijrochi** — ismi (jadval ustida ko'rsatiladi, saqlanadi).
-- **Buyurtmachi** — bo'sh qoldirilsa, faqat chiziq chiqadi (qo'lda to'ldiriladi).
 - **Chegaradoshlar burchagi** — bu jadval qaysi burchagidan qo'yilishi (asosiy jadvaldan mustaqil).
+- **Chegaradoshlar ustuni (×h)** — "Chegaradoshlar" ustuni kengligi (matn balandligiga nisbatan koeffitsient).
+
+**Buyurtmachi** satri va har bir "Chegaradoshlar" katagi tag chiziq (`___`) bilan chiziladi —
+matnni ustiga bosib (double-click) qo'lda yozish oson bo'lishi uchun.
+Sarlavha qatorlari balandligi ham matnga (o'ralgan satr soniga) moslashadi.
 
 > **Muhim:** menyu tugmalari `AdWindows.dll` sborkasiga bog'liq, u esa NuGet'da yo'q —
 > faqat AutoCAD o'rnatilgan papkada bo'ladi. Shuning uchun menyu paydo bo'lishi uchun
