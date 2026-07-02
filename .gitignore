@@ -1,0 +1,29 @@
+# .NET / Visual Studio build artefaktlari
+bin/
+obj/
+[Bb]uild/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+.vs/
+
+# Rider / VS Code
+.idea/
+.vscode/
+
+# NuGet
+*.nupkg
+packages/
+
+# Boshqa
+*.log
+*.tmp
+Thumbs.db
+.DS_Store
+
+# AutoCAD vaqtinchalik fayllari
+*.bak
+*.dwl
+*.dwl2
+*.err

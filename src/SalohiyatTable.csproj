@@ -1,0 +1,44 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net48</TargetFramework>
+    <LangVersion>latest</LangVersion>
+    <AssemblyName>SalohiyatTable</AssemblyName>
+    <RootNamespace>SalohiyatDP.AutoCADTable</RootNamespace>
+    <Configuration Condition="'$(Configuration)' == ''">Release</Configuration>
+    <Platform Condition="'$(Platform)' == ''">x64</Platform>
+    <Platforms>x64</Platforms>
+    <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
+    <GenerateAssemblyInfo>true</GenerateAssemblyInfo>
+    <Company>SalohiyatDP</Company>
+    <Product>SalohiyatTable</Product>
+    <Description>AutoCAD uchun nuqtalarni raqamlab koordinata/masofa jadvali yasovchi plagin</Description>
+
+    <!--
+      AutoCAD o'rnatilgan papka. Kerak bo'lsa o'z versiyangizga moslang, masalan:
+        C:\Program Files\Autodesk\AutoCAD 2022
+      yoki buildda: msbuild /p:AutoCADPath="C:\Program Files\Autodesk\AutoCAD 2025"
+    -->
+    <AutoCADPath Condition="'$(AutoCADPath)' == ''">C:\Program Files\Autodesk\AutoCAD 2024</AutoCADPath>
+  </PropertyGroup>
+
+  <!--
+    AutoCAD ObjectARX (managed) referenslar.
+    Bu DLL'lar AutoCAD ishlashda yuklaydi, shuning uchun CopyLocal = false (Private=false).
+  -->
+  <ItemGroup>
+    <Reference Include="acmgd">
+      <HintPath>$(AutoCADPath)\acmgd.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="acdbmgd">
+      <HintPath>$(AutoCADPath)\acdbmgd.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="accoremgd">
+      <HintPath>$(AutoCADPath)\accoremgd.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+  </ItemGroup>
+
+</Project>
