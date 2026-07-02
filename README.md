@@ -40,9 +40,11 @@ Chegara uzunligi: <perimetr> m
 
 | Buyruq | Vazifasi |
 |--------|----------|
-| `PTABLE`    | Nuqtalarni sichqoncha bilan ketma-ket ko'rsatib jadval yasash. |
-| `PLTABLE`   | Mavjud **poliliniya** (LWPOLYLINE) cho'qqilaridan jadval yasash. |
-| `PTSOZLAMA` | Sozlamalar oynasi (matn balandligi, o'nlik xonalar, nuqta belgisi). |
+| `PTABLE`    | Nuqtalarni sichqoncha bilan ketma-ket ko'rsatib koordinata jadvali yasash. |
+| `PLTABLE`   | Mavjud **poliliniya** (LWPOLYLINE) cho'qqilaridan koordinata jadvali yasash. |
+| `PTCHEGARA` | Nuqtalardan **chegaradoshlar jadvali** (faqat raqamlar). |
+| `PLCHEGARA` | Poliliniyadan **chegaradoshlar jadvali** (faqat raqamlar). |
+| `PTSOZLAMA` | Sozlamalar oynasi (matn balandligi, o'nlik xonalar, nuqta belgisi, jadval burchagi). |
 | `PTHAQIDA`  | Plagin va mualliflar haqida ("Haqida" oynasi). |
 | `PTLOAD`    | DLL ni qayta yuklash (LISP funksiyasi). |
 
@@ -64,7 +66,22 @@ Plagin yuklangach, AutoCAD lentasida (ribbon) **"SalohiyatTable"** yorlig'i payd
 - **"Jadval"** paneli: **Nuqtalardan jadval** (`PTABLE`), **Poliliniyadan jadval** (`PLTABLE`).
 - **"Sozlamalar"** paneli: **Sozlamalar** (`PTSOZLAMA`), **Haqida** (`PTHAQIDA`).
 
+- **"Chegaradoshlar"** paneli: **Chegaradoshlar (nuqtalardan)** (`PTCHEGARA`), **Chegaradoshlar (poliliniya)** (`PLCHEGARA`).
+
 **Mualliflar** ma'lumoti jadvalda emas — menyudagi **"Haqida"** oynasida ko'rsatiladi.
+
+### Chegaradoshlar jadvali
+
+Har bir chegara segmenti nuqta raqamlari bilan ko'rsatiladi (koordinatasiz, **faqat raqamlar**),
+"Chegaradosh" ustuni esa qo'lda to'ldirish uchun bo'sh qoldiriladi:
+
+| Chegaradoshlar |||
+|:---:|:---:|:---:|
+| **№** | **Chegara nuqtalari** | **Chegaradosh** |
+| 1 | 1-2 | |
+| 2 | 2-3 | |
+| … | … | |
+| n | n-1 | |
 
 > **Muhim:** menyu tugmalari `AdWindows.dll` sborkasiga bog'liq, u esa NuGet'da yo'q —
 > faqat AutoCAD o'rnatilgan papkada bo'ladi. Shuning uchun menyu paydo bo'lishi uchun
@@ -162,7 +179,8 @@ AutoCAD_table/
 │   ├── AboutForm.cs            # "Haqida" oynasi (mualliflar)
 │   ├── PointCollector.cs       # nuqta yig'ish (interaktiv / poliliniya)
 │   ├── MarkerDrawer.cs         # nuqta raqamlarini chizish
-│   ├── TableBuilder.cs         # jadval + yuza/perimetr matni
+│   ├── TableBuilder.cs         # koordinata jadvali + yuza/perimetr matni
+│   ├── NeighborsTableBuilder.cs # chegaradoshlar jadvali (faqat raqamlar)
 │   ├── GeometryHelper.cs       # masofa, perimetr, yuza (Shoelace)
 │   └── TableOptions.cs         # o'lcham/format sozlamalari
 ├── lisp/

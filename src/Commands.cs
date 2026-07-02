@@ -14,7 +14,9 @@ namespace SalohiyatDP.AutoCADTable
     /// Plagin buyruqlari:
     ///   PTABLE    - nuqtalarni sichqoncha bilan ketma-ket ko'rsatib jadval yasash
     ///   PLTABLE   - mavjud poliliniya cho'qqilaridan jadval yasash
-    ///   PTSOZLAMA - sozlamalar oynasi (matn balandligi, xonalar, nuqta belgisi)
+    ///   PTCHEGARA - nuqtalardan chegaradoshlar jadvali (faqat raqamlar)
+    ///   PLCHEGARA - poliliniyadan chegaradoshlar jadvali
+    ///   PTSOZLAMA - sozlamalar oynasi (matn balandligi, xonalar, nuqta belgisi, burchak)
     ///   PTHAQIDA  - plagin va mualliflar haqida
     /// Matn balandligi, o'nlik xonalar va nuqta belgisi turi sozlamalardan olinadi
     /// (PTSOZLAMA orqali o'zgartiriladi va saqlanadi).
@@ -63,6 +65,48 @@ namespace SalohiyatDP.AutoCADTable
             RunBuild(doc, ed, db, pts);
         }
 
+        [CommandMethod("PTCHEGARA")]
+        public void NeighborsTablePoints()
+        {
+            AcadDoc doc = AcadApp.DocumentManager.MdiActiveDocument;
+            if (doc == null) return;
+            Editor ed = doc.Editor;
+            Database db = doc.Database;
+
+            List<Point2d> pts = PointCollector.PickPoints(ed);
+            if (pts == null || pts.Count < 2)
+            {
+                ed.WriteMessage("\nKamida 2 ta nuqta kerak. Buyruq bekor qilindi.");
+                return;
+            }
+
+            RunNeighbors(doc, ed, db, pts);
+        }
+
+        [CommandMethod("PLCHEGARA")]
+        public void NeighborsTablePolyline()
+        {
+            AcadDoc doc = AcadApp.DocumentManager.MdiActiveDocument;
+            if (doc == null) return;
+            Editor ed = doc.Editor;
+            Database db = doc.Database;
+
+            List<Point2d> pts;
+            using (Transaction tr = db.TransactionManager.StartTransaction())
+            {
+                pts = PointCollector.FromPolyline(ed, tr);
+                tr.Commit();
+            }
+
+            if (pts == null || pts.Count < 2)
+            {
+                ed.WriteMessage("\nPoliliniya tanlanmadi yoki cho'qqilari yetarli emas. Bekor qilindi.");
+                return;
+            }
+
+            RunNeighbors(doc, ed, db, pts);
+        }
+
         [CommandMethod("PTSOZLAMA")]
         public void ShowSettings()
         {
@@ -104,6 +148,31 @@ namespace SalohiyatDP.AutoCADTable
 
             ed.WriteMessage("\n" + pts.Count + " ta nuqta uchun jadval yaratildi. "
                           + "(Sozlamalar: PTSOZLAMA)");
+        }
+
+        private static void RunNeighbors(AcadDoc doc, Editor ed, Database db, List<Point2d> pts)
+        {
+            PluginSettings s = PluginSettings.Load();
+            TableOptions opt = TableOptions.FromSettings(s);
+
+            var ppo = new PromptPointOptions("\nChegaradoshlar jadvali joyini ko'rsating (tanlangan burchak): ");
+            PromptPointResult ppr = ed.GetPoint(ppo);
+            if (ppr.Status != PromptStatus.OK)
+            {
+                ed.WriteMessage("\nJadval joyi ko'rsatilmadi. Bekor qilindi.");
+                return;
+            }
+            Point3d loc = ppr.Value;
+
+            using (doc.LockDocument())
+            using (Transaction tr = db.TransactionManager.StartTransaction())
+            {
+                NeighborsTableBuilder.Build(tr, db, pts, loc, opt);
+                tr.Commit();
+            }
+
+            int segCount = (pts.Count >= 3) ? pts.Count : (pts.Count - 1);
+            ed.WriteMessage("\nChegaradoshlar jadvali yaratildi (" + segCount + " ta segment).");
         }
     }
 }

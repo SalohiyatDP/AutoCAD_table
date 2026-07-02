@@ -77,6 +77,21 @@ namespace SalohiyatDP.AutoCADTable
                 "Poliliniyadan\njadval", "PLTABLE",
                 "Poliliniya (LWPOLYLINE) cho'qqilaridan koordinata jadvali yasash"));
 
+            // Chegaradoshlar jadvali paneli
+            var sourceN = new RibbonPanelSource { Title = "Chegaradoshlar" };
+            var panelN = new RibbonPanel { Source = sourceN };
+            tab.Panels.Add(panelN);
+
+            sourceN.Items.Add(CreateButton(
+                "Chegaradoshlar\n(nuqtalardan)", "PTCHEGARA",
+                "Nuqtalardan chegaradoshlar jadvali (faqat raqamlar)"));
+
+            sourceN.Items.Add(new RibbonSeparator());
+
+            sourceN.Items.Add(CreateButton(
+                "Chegaradoshlar\n(poliliniya)", "PLCHEGARA",
+                "Poliliniyadan chegaradoshlar jadvali (faqat raqamlar)"));
+
             // Ikkinchi panel: Sozlamalar va Haqida
             var source2 = new RibbonPanelSource { Title = "Sozlamalar" };
             var panel2 = new RibbonPanel { Source = source2 };
