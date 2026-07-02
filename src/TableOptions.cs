@@ -19,6 +19,11 @@ namespace SalohiyatDP.AutoCADTable
 
         public MarkerType Marker;
         public TableAnchor Anchor;
+        public TableAnchor NeighborsAnchor;
+
+        // Chegaradoshlar jadvali sarlavhasi uchun
+        public string Ijrochi = "";
+        public string Buyurtmachi = "";
 
         // Sonlarni formatlash (InvariantCulture bilan)
         public string CoordFormat = "0.00";
@@ -43,6 +48,9 @@ namespace SalohiyatDP.AutoCADTable
                 MinColWidth = th * 4.0,
                 Marker = s.Marker,
                 Anchor = s.Anchor,
+                NeighborsAnchor = s.NeighborsAnchor,
+                Ijrochi = s.Ijrochi,
+                Buyurtmachi = s.Buyurtmachi,
                 CoordFormat = fmt,
                 LenFormat = fmt,
                 AreaFormat = fmt,

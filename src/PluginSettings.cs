@@ -48,6 +48,11 @@ namespace SalohiyatDP.AutoCADTable
         public MarkerType Marker { get; set; } = MarkerType.None;
         public int Decimals { get; set; } = 2;
         public TableAnchor Anchor { get; set; } = TableAnchor.TopLeft;
+        public TableAnchor NeighborsAnchor { get; set; } = TableAnchor.TopLeft;
+
+        // Chegaradoshlar jadvali uchun ijrochi/buyurtmachi ma'lumoti
+        public string Ijrochi { get; set; } = "Karimbekov Asadbek Nasibbek o'g'li";
+        public string Buyurtmachi { get; set; } = "";
 
         private static string FilePath
         {

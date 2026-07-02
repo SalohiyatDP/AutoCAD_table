@@ -72,16 +72,30 @@ Plagin yuklangach, AutoCAD lentasida (ribbon) **"SalohiyatTable"** yorlig'i payd
 
 ### Chegaradoshlar jadvali
 
-Har bir chegara segmenti nuqta raqamlari bilan ko'rsatiladi (koordinatasiz, **faqat raqamlar**),
-"Chegaradosh" ustuni esa qo'lda to'ldirish uchun bo'sh qoldiriladi:
+Jadval ustida **Ijrochi** (sozlamalardan) va **Buyurtmachi** satrlari (tag chiziq bilan)
+chiziladi. Jadvalning o'ziga **faqat raqamlar** qo'yiladi (koordinatasiz); "Chegaradoshlar"
+ustuni qo'lda to'ldirish uchun bo'sh qoladi.
 
-| Chegaradoshlar |||
-|:---:|:---:|:---:|
-| **№** | **Chegara nuqtalari** | **Chegaradosh** |
-| 1 | 1-2 | |
-| 2 | 2-3 | |
-| … | … | |
-| n | n-1 | |
+```
+Ijrochi: <sozlamalardan>            __________________________
+Buyurtmachi:                        __________________________
+┌───────────────────────────────────────────────────────────┐
+│      Yer uchastkasining chegara burulish nuqtalari tasnifi  │
+├───────────────────┬─────────────────────────────────────────┤
+│ Burulish nuqtalari│                                         │
+├────────┬──────────┤            Chegaradoshlar               │
+│  dan   │  gacha   │                                         │
+├────────┼──────────┼─────────────────────────────────────────┤
+│   1    │    2     │                                         │
+│   2    │    3     │                                         │
+│  ...   │   ...    │                                         │
+└────────┴──────────┴─────────────────────────────────────────┘
+```
+
+**Sozlamalarda** (`PTSOZLAMA`) chegaradoshlar jadvali uchun quyidagilar bor:
+- **Ijrochi** — ismi (jadval ustida ko'rsatiladi, saqlanadi).
+- **Buyurtmachi** — bo'sh qoldirilsa, faqat chiziq chiqadi (qo'lda to'ldiriladi).
+- **Chegaradoshlar burchagi** — bu jadval qaysi burchagidan qo'yilishi (asosiy jadvaldan mustaqil).
 
 > **Muhim:** menyu tugmalari `AdWindows.dll` sborkasiga bog'liq, u esa NuGet'da yo'q —
 > faqat AutoCAD o'rnatilgan papkada bo'ladi. Shuning uchun menyu paydo bo'lishi uchun
