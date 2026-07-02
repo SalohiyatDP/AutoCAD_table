@@ -62,11 +62,14 @@ Loyiha AutoCAD'ning boshqariladigan (managed) kutubxonalariga bog'lanadi:
 `src/SalohiyatTable.csproj` faylidagi `AutoCADPath` ni o'z versiyangizga moslang
 yoki build vaqtida bering:
 
-```powershell
-# Visual Studio ichida oching: src\SalohiyatTable.csproj  ->  Build (Release, x64)
+**Visual Studio orqali (tavsiya etiladi):**
+1. `SalohiyatTable.sln` faylini Visual Studio'da oching.
+2. Yuqoridagi panelda konfiguratsiyani **Release**, platformani **x64** qilib tanlang.
+3. **Build → Build Solution** (yoki `Ctrl+Shift+B`).
 
-# yoki buyruq qatoridan:
-msbuild src\SalohiyatTable.csproj /p:Configuration=Release /p:Platform=x64 ^
+**Buyruq qatoridan (msbuild):**
+```powershell
+msbuild SalohiyatTable.sln /p:Configuration=Release /p:Platform=x64 ^
         /p:AutoCADPath="C:\Program Files\Autodesk\AutoCAD 2024"
 ```
 
@@ -93,6 +96,7 @@ Muqobil yo'l: `APPLOAD` orqali to'g'ridan-to'g'ri `SalohiyatTable.dll` ni `NETLO
 
 ```
 AutoCAD_table/
+├── SalohiyatTable.sln          # Visual Studio solution (Release|x64)
 ├── src/
 │   ├── SalohiyatTable.csproj   # .NET loyiha fayli
 │   ├── Commands.cs             # PTABLE / PLTABLE buyruqlari

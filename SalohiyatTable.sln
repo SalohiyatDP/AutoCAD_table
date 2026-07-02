@@ -1,0 +1,25 @@
+
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.0.31903.59
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SalohiyatTable", "src\SalohiyatTable.csproj", "{A1B2C3D4-E5F6-4789-ABCD-1234567890AB}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|x64 = Debug|x64
+		Release|x64 = Release|x64
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{A1B2C3D4-E5F6-4789-ABCD-1234567890AB}.Debug|x64.ActiveCfg = Debug|x64
+		{A1B2C3D4-E5F6-4789-ABCD-1234567890AB}.Debug|x64.Build.0 = Debug|x64
+		{A1B2C3D4-E5F6-4789-ABCD-1234567890AB}.Release|x64.ActiveCfg = Release|x64
+		{A1B2C3D4-E5F6-4789-ABCD-1234567890AB}.Release|x64.Build.0 = Release|x64
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {F7E6D5C4-B3A2-4190-8F7E-6D5C4B3A2190}
+	EndGlobalSection
+EndGlobal
