@@ -46,7 +46,10 @@ Chegara uzunligi: <perimetr> m
 
 Har ikki buyruqda so'raladi:
 1. **Matn balandligi** (standart `2.5`) — jadval o'lchamlari shunga moslashadi.
-2. **Jadval joyi** — jadvalning yuqori-chap burchagi.
+2. **Nuqta belgisi turi** — `Hech` (hech narsa) / `Doira` / `Xbelgi` (X belgisi). Standart: `Hech`.
+3. **Jadval joyi** — jadvalning yuqori-chap burchagi.
+
+Tartib raqamlari har doim **poligondan tashqariga** joylashtiriladi (kontur ichida qolmaydi).
 
 ---
 

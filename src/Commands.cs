@@ -74,6 +74,27 @@ namespace SalohiyatDP.AutoCADTable
             double th = (pdr.Status == PromptStatus.OK) ? pdr.Value : 2.5;
             if (th <= 0) th = 2.5;
 
+            // Nuqta belgisi turini so'rash: Hech / Doira / X
+            MarkerType marker = MarkerType.None;
+            var pko = new PromptKeywordOptions("\nNuqta belgisi turi ")
+            {
+                AllowNone = true
+            };
+            pko.Keywords.Add("Hech");
+            pko.Keywords.Add("Doira");
+            pko.Keywords.Add("Xbelgi");
+            pko.Keywords.Default = "Hech";
+            PromptResult pkr = ed.GetKeywords(pko);
+            if (pkr.Status == PromptStatus.OK)
+            {
+                switch (pkr.StringResult)
+                {
+                    case "Doira": marker = MarkerType.Circle; break;
+                    case "Xbelgi": marker = MarkerType.Cross; break;
+                    default: marker = MarkerType.None; break;
+                }
+            }
+
             // Jadval joyi (yuqori-chap burchak)
             var ppo = new PromptPointOptions("\nJadval joyini ko'rsating (yuqori-chap burchak): ");
             PromptPointResult ppr = ed.GetPoint(ppo);
@@ -89,7 +110,7 @@ namespace SalohiyatDP.AutoCADTable
             using (doc.LockDocument())
             using (Transaction tr = db.TransactionManager.StartTransaction())
             {
-                MarkerDrawer.Draw(tr, db, pts, opt.TextHeight, opt.LabelOffset);
+                MarkerDrawer.Draw(tr, db, pts, opt.TextHeight, opt.LabelOffset, marker, opt.MarkerSize);
                 TableBuilder.Build(tr, db, pts, loc, opt);
                 tr.Commit();
             }

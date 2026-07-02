@@ -15,6 +15,7 @@ namespace SalohiyatDP.AutoCADTable
         public double ColX;          // "X" ustuni kengligi
         public double ColY;          // "Y" ustuni kengligi
         public double LabelOffset;   // nuqta yonidagi raqamning siljishi
+        public double MarkerSize;    // nuqta belgisi (doira radiusi / X yarim o'lchami)
 
         // Sonlarni formatlash (InvariantCulture bilan) - hammasi 2 xonagacha
         public string CoordFormat = "0.00"; // X, Y koordinatalar
@@ -34,7 +35,8 @@ namespace SalohiyatDP.AutoCADTable
                 ColLen = th * 10.0,
                 ColX = th * 13.0,
                 ColY = th * 13.0,
-                LabelOffset = th * 0.5
+                LabelOffset = th * 1.2,
+                MarkerSize = th * 0.5
             };
         }
     }
