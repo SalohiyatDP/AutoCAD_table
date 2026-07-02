@@ -22,24 +22,29 @@
       ============================================================
       AutoCAD .NET API versiyasi (NuGet paketi "AutoCAD.NET").
       MUHIM: bu versiya sizdagi AutoCAD versiyasidan KATTA bo'lmasin.
-      Quyidagi jadvalga qarab tanlang (o'z versiyangizga yoki undan pastroq):
-        AutoCAD 2019 -> 23.0.0
-        AutoCAD 2020 -> 23.1.0
-        AutoCAD 2021 -> 24.0.0
+        AutoCAD 2019 -> 23.0.0     AutoCAD 2023 -> 24.2.0
+        AutoCAD 2020 -> 23.1.0     AutoCAD 2024 -> 24.3.0
+        AutoCAD 2021 -> 24.0.0     AutoCAD 2025 -> 25.0.0 (TargetFramework: net8.0-windows)
         AutoCAD 2022 -> 24.1.0
-        AutoCAD 2023 -> 24.2.0
-        AutoCAD 2024 -> 24.3.0
-        AutoCAD 2025 -> 25.0.0   (bu holda TargetFramework ni net8.0-windows qiling)
-      Past versiyaga qurilgan plagin yuqori AutoCAD'da ham ishlaydi.
       ============================================================
     -->
     <AcadNetVersion Condition="'$(AcadNetVersion)' == ''">23.1.0</AcadNetVersion>
+
+    <!--
+      ============================================================
+      LENTADAGI MENYU (Ribbon) uchun AutoCAD o'rnatilgan papka.
+      AdWindows.dll NuGet'da yo'q, u faqat AutoCAD papkasida bo'ladi.
+      Bu yerga o'z AutoCAD papkangizni yozing, masalan:
+        C:\Program Files\Autodesk\AutoCAD 2022
+      Agar to'g'ri ko'rsatilsa -> "SalohiyatTable" lenta menyusi paydo bo'ladi.
+      Agar bo'sh/noto'g'ri bo'lsa -> build baribir muvaffaqiyatli bo'ladi,
+      lekin menyu bo'lmaydi (faqat PTABLE / PLTABLE buyruqlari ishlaydi).
+      ============================================================
+    -->
+    <AutoCADPath Condition="'$(AutoCADPath)' == ''">C:\Program Files\Autodesk\AutoCAD 2024</AutoCADPath>
   </PropertyGroup>
 
-  <!--
-    AutoCAD ObjectARX (managed) sborkalari NuGet orqali olinadi.
-    ExcludeAssets=runtime -> DLL'lar chiqishga nusxalanmaydi (ular AutoCAD'da mavjud).
-  -->
+  <!-- Asosiy AutoCAD .NET API (NuGet). runtime -> chiqishga nusxalanmaydi. -->
   <ItemGroup>
     <PackageReference Include="AutoCAD.NET" Version="$(AcadNetVersion)">
       <ExcludeAssets>runtime</ExcludeAssets>
@@ -47,29 +52,18 @@
   </ItemGroup>
 
   <!--
-    ============================================================================
-    MUQOBIL USUL (agar NuGet ishlatmoqchi bo'lmasangiz):
-    Yuqoridagi <ItemGroup> ni o'chirib, quyidagini yoqing va AutoCADPath ni
-    o'z o'rnatilgan papkangizga moslang.
-    ============================================================================
-
-    <PropertyGroup>
-      <AutoCADPath>C:\Program Files\Autodesk\AutoCAD 2024</AutoCADPath>
-    </PropertyGroup>
-    <ItemGroup>
-      <Reference Include="acmgd">
-        <HintPath>$(AutoCADPath)\acmgd.dll</HintPath>
-        <Private>false</Private>
-      </Reference>
-      <Reference Include="acdbmgd">
-        <HintPath>$(AutoCADPath)\acdbmgd.dll</HintPath>
-        <Private>false</Private>
-      </Reference>
-      <Reference Include="accoremgd">
-        <HintPath>$(AutoCADPath)\accoremgd.dll</HintPath>
-        <Private>false</Private>
-      </Reference>
-    </ItemGroup>
+    Ribbon menyusi: AdWindows.dll topilgan taqdirdagina qo'shiladi.
+    Shu tufayli AutoCADPath noto'g'ri bo'lsa ham loyiha baribir kompilyatsiya bo'ladi.
   -->
+  <PropertyGroup Condition="Exists('$(AutoCADPath)\AdWindows.dll')">
+    <UseWPF>true</UseWPF>
+    <DefineConstants>$(DefineConstants);RIBBON</DefineConstants>
+  </PropertyGroup>
+  <ItemGroup Condition="Exists('$(AutoCADPath)\AdWindows.dll')">
+    <Reference Include="AdWindows">
+      <HintPath>$(AutoCADPath)\AdWindows.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+  </ItemGroup>
 
 </Project>

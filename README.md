@@ -50,6 +50,27 @@ Har ikki buyruqda so'raladi:
 
 ---
 
+## Lentadagi menyu (Ribbon)
+
+Plagin yuklangach, AutoCAD lentasida (ribbon) **"SalohiyatTable"** yorlig'i paydo
+bo'ladi. Uning ichida **"Jadval"** paneli va ikkita tugma bor:
+- **Nuqtalardan jadval** → `PTABLE`
+- **Poliliniyadan jadval** → `PLTABLE`
+
+> **Muhim:** menyu tugmalari `AdWindows.dll` sborkasiga bog'liq, u esa NuGet'da yo'q —
+> faqat AutoCAD o'rnatilgan papkada bo'ladi. Shuning uchun menyu paydo bo'lishi uchun
+> `src/SalohiyatTable.csproj` dagi **`AutoCADPath`** ni o'z AutoCAD papkangizga
+> to'g'rilang (masalan `C:\Program Files\Autodesk\AutoCAD 2022`) va qayta build qiling.
+>
+> Agar `AutoCADPath` ko'rsatilmasa yoki noto'g'ri bo'lsa, build baribir muvaffaqiyatli
+> bo'ladi, lekin menyu bo'lmaydi — bunda `PTABLE` / `PLTABLE` buyruqlarini buyruq
+> qatoriga yozib ishlatasiz.
+>
+> Menyu ko'rinmasa: lentaning o'zi yoqilganini tekshiring (`RIBBON` buyrug'i), va
+> DLL `NETLOAD` qilinganini tasdiqlang.
+
+---
+
 ## Kompilyatsiya (Build)
 
 Talablar:
@@ -97,8 +118,9 @@ dotnet build SalohiyatTable.sln -c Release
 
 Natijada `SalohiyatTable.dll` hosil bo'ladi (`src\bin\Release\`).
 
-> **NuGet ishlamasa** (internet yo'q / korporativ tarmoq): `csproj` ichidagi izohlangan
-> "MUQOBIL USUL" blokini yoqib, `AutoCADPath` ni o'rnatilgan papkangizga moslang.
+> **Lentadagi menyu uchun:** `csproj` dagi `AutoCADPath` to'g'ri ko'rsatilsa,
+> build vaqtida `AdWindows.dll` topiladi va menyu qo'shiladi. Aks holda faqat
+> buyruqlar (PTABLE/PLTABLE) ishlaydi — build baribir muvaffaqiyatli bo'ladi.
 
 > **Eslatma:** `net48` ko'pchilik AutoCAD versiyalari (2019–2024) uchun mos.
 > AutoCAD 2025+ uchun `TargetFramework` ni `net8.0-windows` ga o'zgartiring.
@@ -125,6 +147,7 @@ AutoCAD_table/
 ├── src/
 │   ├── SalohiyatTable.csproj   # .NET loyiha fayli
 │   ├── Commands.cs             # PTABLE / PLTABLE buyruqlari
+│   ├── RibbonUi.cs             # lentadagi menyu (Ribbon tab + tugmalar)
 │   ├── PointCollector.cs       # nuqta yig'ish (interaktiv / poliliniya)
 │   ├── MarkerDrawer.cs         # nuqta raqamlarini chizish
 │   ├── TableBuilder.cs         # jadval + yuza/perimetr matni
