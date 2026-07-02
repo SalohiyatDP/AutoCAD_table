@@ -44,9 +44,15 @@ namespace SalohiyatDP.AutoCADTable
             for (int r = 0; r < totalRows; r++)
                 tb.Rows[r].Height = opt.RowHeight;
 
-            // Sarlavha kataklarini birlashtirish
-            tb.MergeCells(CellRange.Create(tb, 0, 0, 1, 0)); // "Nuqtalar T/R" vertikal
-            tb.MergeCells(CellRange.Create(tb, 0, 1, 0, 3)); // "Geomalumotlar" gorizontal
+            // STANDARD jadval uslubida 0-qator (Title) barcha ustunlar bo'yicha
+            // avtomatik birlashtirilgan bo'ladi. Bu bizning birlashmalarga xalaqit
+            // beradi va eInvalidInput xatosini keltirib chiqaradi. Shuning uchun
+            // avval mavjud birlashmani yechib olamiz.
+            UnmergeIfMerged(tb, 0, 0);
+
+            // Sarlavha kataklarini birlashtirish (xavfsiz - xato bo'lsa jadval baribir yasaladi)
+            TryMerge(tb, 0, 0, 1, 0); // "Nuqtalar T/R" vertikal
+            TryMerge(tb, 0, 1, 0, 3); // "Geomalumotlar" gorizontal
 
             SetCell(tb, 0, 0, "Nuqtalar T/R", opt.TextHeight);
             SetCell(tb, 0, 1, "Geomalumotlar", opt.TextHeight);
@@ -116,6 +122,34 @@ namespace SalohiyatDP.AutoCADTable
             cell.TextString = text;
             cell.Alignment = CellAlignment.MiddleCenter;
             cell.TextHeight = textHeight;
+        }
+
+        /// <summary>Katakda birlashma bo'lsa, uni yechadi (masalan, standart Title qatori).</summary>
+        private static void UnmergeIfMerged(Table tb, int r, int c)
+        {
+            try
+            {
+                CellRange range = tb.Cells[r, c].GetMergeRange();
+                if (range != null)
+                    tb.UnmergeCells(range);
+            }
+            catch
+            {
+                // Birlashma bo'lmasa yoki API farq qilsa - e'tiborsiz.
+            }
+        }
+
+        /// <summary>Kataklarni xavfsiz birlashtiradi: xato bo'lsa jadval yasalishi to'xtamaydi.</summary>
+        private static void TryMerge(Table tb, int topRow, int leftCol, int bottomRow, int rightCol)
+        {
+            try
+            {
+                tb.MergeCells(CellRange.Create(tb, topRow, leftCol, bottomRow, rightCol));
+            }
+            catch
+            {
+                // Birlashtirib bo'lmasa - kataklar alohida qoladi (jadval baribir to'g'ri).
+            }
         }
 
         private static void AddCenteredText(Transaction tr, BlockTableRecord ms, string text, Point3d pos, double textHeight)

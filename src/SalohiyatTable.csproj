@@ -28,7 +28,7 @@
         AutoCAD 2022 -> 24.1.0
       ============================================================
     -->
-    <AcadNetVersion Condition="'$(AcadNetVersion)' == ''">23.1.0</AcadNetVersion>
+    <AcadNetVersion Condition="'$(AcadNetVersion)' == ''">24.0.0</AcadNetVersion>
 
     <!--
       ============================================================
@@ -41,7 +41,7 @@
       lekin menyu bo'lmaydi (faqat PTABLE / PLTABLE buyruqlari ishlaydi).
       ============================================================
     -->
-    <AutoCADPath Condition="'$(AutoCADPath)' == ''">C:\Program Files\Autodesk\AutoCAD 2024</AutoCADPath>
+    <AutoCADPath Condition="'$(AutoCADPath)' == ''">C:\Program Files\Autodesk\AutoCAD 2021</AutoCADPath>
   </PropertyGroup>
 
   <!-- Asosiy AutoCAD .NET API (NuGet). runtime -> chiqishga nusxalanmaydi. -->
