@@ -18,6 +18,7 @@ namespace SalohiyatDP.AutoCADTable
         public double MinColWidth;   // ustunning minimal kengligi
 
         public MarkerType Marker;
+        public TableAnchor Anchor;
 
         // Sonlarni formatlash (InvariantCulture bilan)
         public string CoordFormat = "0.00";
@@ -41,6 +42,7 @@ namespace SalohiyatDP.AutoCADTable
                 ColPadding = th * 0.8,
                 MinColWidth = th * 4.0,
                 Marker = s.Marker,
+                Anchor = s.Anchor,
                 CoordFormat = fmt,
                 LenFormat = fmt,
                 AreaFormat = fmt,

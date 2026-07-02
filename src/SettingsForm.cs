@@ -16,6 +16,7 @@ namespace SalohiyatDP.AutoCADTable
         private TextBox _txtHeight;
         private NumericUpDown _numDecimals;
         private ComboBox _cmbMarker;
+        private ComboBox _cmbAnchor;
 
         public SettingsForm(PluginSettings settings)
         {
@@ -31,7 +32,7 @@ namespace SalohiyatDP.AutoCADTable
             StartPosition = FormStartPosition.CenterScreen;
             MaximizeBox = false;
             MinimizeBox = false;
-            ClientSize = new Size(400, 190);
+            ClientSize = new Size(400, 230);
             Font = new Font("Segoe UI", 9F);
 
             int labelX = 15;
@@ -53,6 +54,12 @@ namespace SalohiyatDP.AutoCADTable
             _cmbMarker = new ComboBox { Left = inputX, Top = y, Width = 200, DropDownStyle = ComboBoxStyle.DropDownList };
             _cmbMarker.Items.AddRange(new object[] { "Hech (belgi yo'q)", "Doira", "X belgisi" });
             Controls.Add(_cmbMarker);
+            y += step;
+
+            AddLabel("Jadval burchagi:", labelX, y + 3);
+            _cmbAnchor = new ComboBox { Left = inputX, Top = y, Width = 200, DropDownStyle = ComboBoxStyle.DropDownList };
+            _cmbAnchor.Items.AddRange(new object[] { "Chap-yuqori", "O'ng-yuqori", "Chap-pastki", "O'ng-pastki" });
+            Controls.Add(_cmbAnchor);
             y += step + 16;
 
             var btnOk = new Button { Text = "Saqlash", Left = 205, Top = y, Width = 90, DialogResult = DialogResult.OK };
@@ -76,6 +83,7 @@ namespace SalohiyatDP.AutoCADTable
             _txtHeight.Text = _s.TextHeight.ToString(CultureInfo.InvariantCulture);
             _numDecimals.Value = Math.Max(0, Math.Min(6, _s.Decimals));
             _cmbMarker.SelectedIndex = (int)_s.Marker; // None=0, Circle=1, Cross=2
+            _cmbAnchor.SelectedIndex = (int)_s.Anchor; // TopLeft=0 ... BottomRight=3
         }
 
         private void OnSave(object sender, EventArgs e)
@@ -93,6 +101,7 @@ namespace SalohiyatDP.AutoCADTable
             _s.TextHeight = h;
             _s.Decimals = (int)_numDecimals.Value;
             _s.Marker = (MarkerType)_cmbMarker.SelectedIndex;
+            _s.Anchor = (TableAnchor)_cmbAnchor.SelectedIndex;
             _s.Save();
         }
     }

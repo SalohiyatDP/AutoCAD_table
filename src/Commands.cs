@@ -84,8 +84,8 @@ namespace SalohiyatDP.AutoCADTable
             PluginSettings s = PluginSettings.Load();
             TableOptions opt = TableOptions.FromSettings(s);
 
-            // Jadval joyi (yuqori-chap burchak)
-            var ppo = new PromptPointOptions("\nJadval joyini ko'rsating (yuqori-chap burchak): ");
+            // Jadval joyi (tanlangan burchak sozlamalardan)
+            var ppo = new PromptPointOptions("\nJadval joyini ko'rsating (tanlangan burchak): ");
             PromptPointResult ppr = ed.GetPoint(ppo);
             if (ppr.Status != PromptStatus.OK)
             {

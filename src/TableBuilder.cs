@@ -53,9 +53,31 @@ namespace SalohiyatDP.AutoCADTable
                 w1 += add; w2 += add; w3 += add;
             }
 
+            // ---- Jadval o'lchamlari va boshlanish (yuqori-chap) nuqtasi ----
+            // Ko'rsatilgan nuqta tanlangan burchak bo'lishi uchun originni hisoblaymiz.
+            double totalW = w0 + w1 + w2 + w3;
+            double totalH = totalRows * rh;
+
+            double originX = loc.X;
+            double originY = loc.Y;
+            switch (opt.Anchor)
+            {
+                case TableAnchor.TopRight:
+                    originX = loc.X - totalW;
+                    break;
+                case TableAnchor.BottomLeft:
+                    originY = loc.Y + totalH;
+                    break;
+                case TableAnchor.BottomRight:
+                    originX = loc.X - totalW;
+                    originY = loc.Y + totalH;
+                    break;
+                // TableAnchor.TopLeft: o'zgarishsiz (ko'rsatilgan nuqta = yuqori-chap)
+            }
+
             // ---- Chegaralar ----
             double[] X = new double[5];
-            X[0] = loc.X;
+            X[0] = originX;
             X[1] = X[0] + w0;
             X[2] = X[1] + w1;
             X[3] = X[2] + w2;
@@ -63,7 +85,7 @@ namespace SalohiyatDP.AutoCADTable
 
             double[] Y = new double[totalRows + 1];
             for (int k = 0; k <= totalRows; k++)
-                Y[k] = loc.Y - k * rh;
+                Y[k] = originY - k * rh;
 
             var bt = (BlockTable)tr.GetObject(db.BlockTableId, OpenMode.ForRead);
             var ms = (BlockTableRecord)tr.GetObject(bt[BlockTableRecord.ModelSpace], OpenMode.ForWrite);

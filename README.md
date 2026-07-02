@@ -47,8 +47,10 @@ Chegara uzunligi: <perimetr> m
 | `PTLOAD`    | DLL ni qayta yuklash (LISP funksiyasi). |
 
 `PTABLE` / `PLTABLE` da faqat **jadval joyi** (yuqori-chap burchak) so'raladi.
-Matn balandligi, o'nlik xonalar soni va nuqta belgisi turi **sozlamalardan** olinadi
-(`PTSOZLAMA` orqali o'zgartiriladi va **saqlanadi** — keyingi seanslarda ham qoladi).
+Matn balandligi, o'nlik xonalar soni, nuqta belgisi turi va **jadval burchagi**
+(ko'rsatilgan nuqta jadvalning qaysi burchagi bo'lishi: chap-yuqori / o'ng-yuqori /
+chap-pastki / o'ng-pastki) **sozlamalardan** olinadi (`PTSOZLAMA` orqali o'zgartiriladi
+va **saqlanadi** — keyingi seanslarda ham qoladi).
 
 - Tartib raqamlari har doim **poligondan tashqariga** joylashtiriladi (kontur ichida qolmaydi).
 - Ustun kengliklari katakdagi eng uzun matnga qarab **avtomatik moslashadi** (jadval eniga ham moslashadi).

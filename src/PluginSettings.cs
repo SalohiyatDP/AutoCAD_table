@@ -13,6 +13,18 @@ namespace SalohiyatDP.AutoCADTable
     }
 
     /// <summary>
+    /// Ko'rsatilgan nuqta jadvalning qaysi burchagi bo'lishini bildiradi.
+    /// (Tartib: SettingsForm dagi ro'yxat tartibiga mos.)
+    /// </summary>
+    public enum TableAnchor
+    {
+        TopLeft,     // chap-yuqori
+        TopRight,    // o'ng-yuqori
+        BottomLeft,  // chap-pastki
+        BottomRight  // o'ng-pastki
+    }
+
+    /// <summary>
     /// Plagin haqida ma'lumot (menyudagi "Haqida" bo'limi uchun).
     /// </summary>
     public static class PluginInfo
@@ -35,6 +47,7 @@ namespace SalohiyatDP.AutoCADTable
         public double TextHeight { get; set; } = 2.5;
         public MarkerType Marker { get; set; } = MarkerType.None;
         public int Decimals { get; set; } = 2;
+        public TableAnchor Anchor { get; set; } = TableAnchor.TopLeft;
 
         private static string FilePath
         {
