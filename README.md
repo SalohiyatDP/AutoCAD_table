@@ -12,7 +12,7 @@ Plagin ikki qismdan iborat:
 
 ## Jadval ko'rinishi
 
-| Nuqtalar T/R | Geomalumotlar |||
+| Nuqtalar № | Geo ma'lumotlar |||
 |:---:|:---:|:---:|:---:|
 |      | **Uzunligi(m)** | **X** | **Y** |
 | 1 |     | X1 | Y1 |

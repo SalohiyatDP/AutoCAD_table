@@ -10,7 +10,7 @@ namespace SalohiyatDP.AutoCADTable
     /// yer maydoni (m.kv, ga) hamda chegara uzunligi matnini qo'yadi.
     ///
     /// Jadval tuzilishi (rasmga mos):
-    ///   Sarlavha 1: | Nuqtalar T/R |            Geomalumotlar            |
+    ///   Sarlavha 1: | Nuqtalar №   |           Geo ma'lumotlar           |
     ///   Sarlavha 2: |              | Uzunligi(m) |     X     |     Y      |
     ///   Har bir nuqta ikki qatordan iborat:
     ///     - nuqta qatori:  [T/R] [ - ] [X] [Y]
@@ -37,6 +37,13 @@ namespace SalohiyatDP.AutoCADTable
             tb.Position = loc;
             tb.SetSize(totalRows, 4);
 
+            // Katak chekkalarini (margin) kichraytiramiz -> qator balandligi matnga moslashadi.
+            // Bu xossalar "obsolete" deb belgilangan, lekin AutoCAD 2021 da ishlaydi.
+#pragma warning disable CS0618
+            tb.HorizontalCellMargin = opt.HMargin;
+            tb.VerticalCellMargin = opt.VMargin;
+#pragma warning restore CS0618
+
             tb.Columns[0].Width = opt.ColTR;
             tb.Columns[1].Width = opt.ColLen;
             tb.Columns[2].Width = opt.ColX;
@@ -54,8 +61,8 @@ namespace SalohiyatDP.AutoCADTable
             TryMerge(tb, 0, 0, 1, 0); // "Nuqtalar T/R" vertikal
             TryMerge(tb, 0, 1, 0, 3); // "Geomalumotlar" gorizontal
 
-            SetCell(tb, 0, 0, "Nuqtalar T/R", opt.TextHeight);
-            SetCell(tb, 0, 1, "Geomalumotlar", opt.TextHeight);
+            SetCell(tb, 0, 0, "Nuqtalar №", opt.TextHeight);
+            SetCell(tb, 0, 1, "Geo ma'lumotlar", opt.TextHeight);
             SetCell(tb, 1, 1, "Uzunligi(m)", opt.TextHeight);
             SetCell(tb, 1, 2, "X", opt.TextHeight);
             SetCell(tb, 1, 3, "Y", opt.TextHeight);

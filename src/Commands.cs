@@ -89,7 +89,7 @@ namespace SalohiyatDP.AutoCADTable
             using (doc.LockDocument())
             using (Transaction tr = db.TransactionManager.StartTransaction())
             {
-                MarkerDrawer.Draw(tr, db, pts, opt.TextHeight, opt.MarkerRadius);
+                MarkerDrawer.Draw(tr, db, pts, opt.TextHeight, opt.LabelOffset);
                 TableBuilder.Build(tr, db, pts, loc, opt);
                 tr.Commit();
             }
