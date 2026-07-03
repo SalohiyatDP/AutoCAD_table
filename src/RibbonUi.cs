@@ -92,6 +92,15 @@ namespace SalohiyatDP.AutoCADTable
                 "Chegaradoshlar\n(poliliniya)", "PLCHEGARA",
                 "Poliliniyadan chegaradoshlar jadvali (faqat raqamlar)"));
 
+            // Poligon paneli
+            var sourceP = new RibbonPanelSource { Title = "Poligon" };
+            var panelP = new RibbonPanel { Source = sourceP };
+            tab.Panels.Add(panelP);
+
+            sourceP.Items.Add(CreateButton(
+                "Nuqtalardan\npoligon yaratish", "PTPOLIGON",
+                "GPS nuqta raqamlari (masalan 145-165, 171, 182-260) bo'yicha poligon yasash"));
+
             // Ikkinchi panel: Sozlamalar va Haqida
             var source2 = new RibbonPanelSource { Title = "Sozlamalar" };
             var panel2 = new RibbonPanel { Source = source2 };

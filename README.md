@@ -68,6 +68,7 @@ Plagin yuklangach, AutoCAD lentasida (ribbon) **"SalohiyatTable"** yorlig'i payd
 - **"Sozlamalar"** paneli: **Sozlamalar** (`PTSOZLAMA`), **Haqida** (`PTHAQIDA`).
 
 - **"Chegaradoshlar"** paneli: **Chegaradoshlar (nuqtalardan)** (`PTCHEGARA`), **Chegaradoshlar (poliliniya)** (`PLCHEGARA`).
+- **"Poligon"** paneli: **Nuqtalardan poligon yaratish** (`PTPOLIGON`).
 
 **Mualliflar** ma'lumoti jadvalda emas — menyudagi **"Haqida"** oynasida ko'rsatiladi.
 
