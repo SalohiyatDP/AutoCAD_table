@@ -44,6 +44,7 @@ Chegara uzunligi: <perimetr> m
 | `PLTABLE`   | Mavjud **poliliniya** (LWPOLYLINE) cho'qqilaridan koordinata jadvali yasash. |
 | `PTCHEGARA` | Nuqtalardan **chegaradoshlar jadvali** (faqat raqamlar). |
 | `PLCHEGARA` | Poliliniyadan **chegaradoshlar jadvali** (faqat raqamlar). |
+| `PTPOLIGON` | GPS nuqta bloklaridan tartib raqamlari bo'yicha **poligon** (yopiq poliliniya) yasash. |
 | `PTSOZLAMA` | Sozlamalar oynasi (matn balandligi, o'nlik xonalar, nuqta belgisi, jadval burchagi). |
 | `PTHAQIDA`  | Plagin va mualliflar haqida ("Haqida" oynasi). |
 | `PTLOAD`    | DLL ni qayta yuklash (LISP funksiyasi). |
@@ -101,6 +102,26 @@ Buyurtmachi:                        __________________________
 **Buyurtmachi** satri va har bir "Chegaradoshlar" katagi tag chiziq (`___`) bilan chiziladi —
 matnni ustiga bosib (double-click) qo'lda yozish oson bo'lishi uchun.
 Sarlavha qatorlari balandligi ham matnga (o'ralgan satr soniga) moslashadi.
+
+---
+
+## Nuqtalardan poligon yasash (`PTPOLIGON`)
+
+GPS qurilmasidan olingan nuqtalar chizmada **atributli blok** ko'rinishida bo'lib, har birida
+**tartib raqami** (butun son), tavsif va balandlik atributlari bo'ladi. `PTPOLIGON` buyrug'i
+kiritilgan raqamli nuqtalarni **ketma-ket tutashtirib yopiq poliliniya (poligon)** yasaydi.
+
+Ishlatish:
+1. `PTPOLIGON` buyrug'ini yozing.
+2. Raqamlarni kiriting, masalan: `145-165, 171, 182-260`
+   - `a-b` — diapazon (`145-165` = 145, 146, …, 165).
+   - Vergul bilan ajratiladi; alohida raqam ham bo'ladi (`171`).
+3. Shu raqamli nuqtalar (blok insert nuqtalari) berilgan tartibda tutashtirilib poligon chiziladi.
+4. Topilmagan raqamlar (agar bo'lsa) buyruq qatorida ko'rsatiladi.
+
+> Har bir blokning **butun sonli** atributi tartib raqami deb olinadi (o'nlik balandlik
+> yoki matnli tavsif hisobga olinmaydi). Yasalgan poligonni keyin `PLTABLE` yoki `PLCHEGARA`
+> bilan jadvalga aylantirish mumkin.
 
 > **Muhim:** menyu tugmalari `AdWindows.dll` sborkasiga bog'liq, u esa NuGet'da yo'q —
 > faqat AutoCAD o'rnatilgan papkada bo'ladi. Shuning uchun menyu paydo bo'lishi uchun
