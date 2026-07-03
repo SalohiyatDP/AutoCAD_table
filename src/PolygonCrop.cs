@@ -12,12 +12,13 @@ using AcadDoc = Autodesk.AutoCAD.ApplicationServices.Document;
 namespace SalohiyatDP.AutoCADTable
 {
     /// <summary>
-    /// "Poligondan ajratish" funksiyasi. Avval ICHKI yopiq poliliniya, so'ng TASHQI yopiq
-    /// poliliniya tanlanadi. Natijada:
-    ///   - ichki poligon ichidagi chizma/yozuvlar QOLADI,
-    ///   - ichki va tashqi poligonlar orasidagi (halqa) barcha chizma/yozuvlar O'CHIRILADI,
+    /// "Poligondan ajratish" funksiyasi. Foydalanuvchi avval ICHKI poligonni, so'ng TASHQI
+    /// poligonni CHIZADI (nuqtalarni ko'rsatib, Enter bilan tugatadi). Natijada:
+    ///   - ichki poligon ichida to'liq joylashgan chizma/yozuvlar QOLADI,
+    ///   - ichki poligondan tashqaridagi (ichki chegarani kesib o'tuvchilar ham) barcha
+    ///     obyektlar O'CHIRILADI, ammo faqat TASHQI poligon ichida,
     ///   - tashqi poligondan tashqaridagilar TEGILMAYDI.
-    /// Ikki poligonning o'zi (chegaralari) o'chirilmaydi.
+    /// Chizilgan poligonlar vaqtinchalik (chizmada qolmaydi).
     /// </summary>
     public class CropCommands
     {
@@ -29,17 +30,21 @@ namespace SalohiyatDP.AutoCADTable
             Editor ed = doc.Editor;
             Database db = doc.Database;
 
-            // 1) Ichki poligon
-            ObjectId innerId = PromptPolyline(ed, "\nIchki poligonni tanlang: ");
-            if (innerId.IsNull) { ed.WriteMessage("\nIchki poligon tanlanmadi. Bekor qilindi."); return; }
-
-            // 2) Tashqi poligon
-            ObjectId outerId = PromptPolyline(ed, "\nTashqi poligonni tanlang: ");
-            if (outerId.IsNull) { ed.WriteMessage("\nTashqi poligon tanlanmadi. Bekor qilindi."); return; }
-
-            if (innerId == outerId)
+            // 1) Ichki poligonni chizish
+            ed.WriteMessage("\n--- Ichki poligonni chizing (qoldiriladigan soha) ---");
+            Point3dCollection innerPts = PickPolygon(ed, "Ichki poligon");
+            if (innerPts == null || innerPts.Count < 3)
             {
-                ed.WriteMessage("\nIchki va tashqi poligon bir xil bo'lmasligi kerak.");
+                ed.WriteMessage("\nIchki poligon uchun kamida 3 nuqta kerak. Bekor qilindi.");
+                return;
+            }
+
+            // 2) Tashqi poligonni chizish
+            ed.WriteMessage("\n--- Tashqi poligonni chizing (tozalash chegarasi) ---");
+            Point3dCollection outerPts = PickPolygon(ed, "Tashqi poligon");
+            if (outerPts == null || outerPts.Count < 3)
+            {
+                ed.WriteMessage("\nTashqi poligon uchun kamida 3 nuqta kerak. Bekor qilindi.");
                 return;
             }
 
@@ -48,20 +53,13 @@ namespace SalohiyatDP.AutoCADTable
             using (doc.LockDocument())
             using (Transaction tr = db.TransactionManager.StartTransaction())
             {
-                Point3dCollection innerPts = GetPolyPoints(tr, innerId);
-                Point3dCollection outerPts = GetPolyPoints(tr, outerId);
-
-                if (innerPts == null || innerPts.Count < 3 || outerPts == null || outerPts.Count < 3)
-                {
-                    ed.WriteMessage("\nPoligonlar yopiq poliliniya (kamida 3 cho'qqi) bo'lishi kerak.");
-                    tr.Commit();
-                    return;
-                }
-
-                // Tashqi ichida to'liq joylashgan obyektlar (o'chirishga nomzod)
+                // Tashqi poligon ichida TO'LIQ joylashgan obyektlar (o'chirishga nomzod).
+                // Tashqi chegarani kesib chiquvchilar tegilmaydi.
                 PromptSelectionResult inOuter = ed.SelectWindowPolygon(outerPts);
-                // Ichki bilan kesishgan yoki ichidagi obyektlar (saqlanadi)
-                PromptSelectionResult inInner = ed.SelectCrossingPolygon(innerPts);
+
+                // Ichki poligon ichida TO'LIQ joylashgan obyektlar (saqlanadi).
+                // Ichki chegarani kesib o'tuvchilar saqlanmaydi -> o'chadi.
+                PromptSelectionResult inInner = ed.SelectWindowPolygon(innerPts);
 
                 if (inOuter.Status != PromptStatus.OK || inOuter.Value == null)
                 {
@@ -70,19 +68,15 @@ namespace SalohiyatDP.AutoCADTable
                     return;
                 }
 
-                // Saqlanadigan ObjectId'lar to'plami
                 var keep = new HashSet<ObjectId>();
                 if (inInner.Status == PromptStatus.OK && inInner.Value != null)
                     foreach (SelectedObject so in inInner.Value)
                         if (so != null) keep.Add(so.ObjectId);
 
-                keep.Add(innerId); // poligon chegaralarini saqlaymiz
-                keep.Add(outerId);
-
                 foreach (SelectedObject so in inOuter.Value)
                 {
                     if (so == null) continue;
-                    if (keep.Contains(so.ObjectId)) continue;
+                    if (keep.Contains(so.ObjectId)) continue; // ichkaridagini saqlaymiz
 
                     try
                     {
@@ -106,29 +100,35 @@ namespace SalohiyatDP.AutoCADTable
                           + "(ichki poligon ichidagilar saqlab qolindi).");
         }
 
-        /// <summary>Yopiq poliliniyani tanlashni so'raydi.</summary>
-        private static ObjectId PromptPolyline(Editor ed, string message)
+        /// <summary>Foydalanuvchi nuqtalarni ketma-ket ko'rsatib poligon chizadi (Enter - tugatish).</summary>
+        private static Point3dCollection PickPolygon(Editor ed, string title)
         {
-            var peo = new PromptEntityOptions(message);
-            peo.SetRejectMessage("\nFaqat poliliniya (LWPOLYLINE) tanlang.");
-            peo.AddAllowedClass(typeof(Polyline), true);
+            var list = new List<Point3d>();
 
-            PromptEntityResult per = ed.GetEntity(peo);
-            return per.Status == PromptStatus.OK ? per.ObjectId : ObjectId.Null;
-        }
+            while (true)
+            {
+                string msg = "\n" + title + " — "
+                           + (list.Count == 0 ? "birinchi nuqta" : (list.Count + 1) + "-nuqta")
+                           + " (tugatish uchun Enter): ";
+                var ppo = new PromptPointOptions(msg) { AllowNone = true };
 
-        /// <summary>Poliliniya cho'qqilaridan Point3dCollection quradi.</summary>
-        private static Point3dCollection GetPolyPoints(Transaction tr, ObjectId id)
-        {
-            var pl = tr.GetObject(id, OpenMode.ForRead) as Polyline;
-            if (pl == null) return null;
+                if (list.Count > 0)
+                {
+                    ppo.UseBasePoint = true;
+                    ppo.BasePoint = list[list.Count - 1];
+                    ppo.UseDashedLine = true;
+                }
+
+                PromptPointResult r = ed.GetPoint(ppo);
+                if (r.Status == PromptStatus.OK)
+                    list.Add(r.Value);
+                else
+                    break;
+            }
 
             var pts = new Point3dCollection();
-            for (int i = 0; i < pl.NumberOfVertices; i++)
-            {
-                Point2d p = pl.GetPoint2dAt(i);
+            foreach (Point3d p in list)
                 pts.Add(new Point3d(p.X, p.Y, 0.0));
-            }
             return pts;
         }
     }

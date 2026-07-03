@@ -189,23 +189,22 @@ Ishlatish:
 
 ## Poligondan ajratish (`PTAJRAT`)
 
-Ikki poligon orasidagi keraksiz chizma va yozuvlarni tozalaydi (masalan bitta binoni
-ajratib olish uchun).
+Keraksiz chizma va yozuvlarni tozalaydi (masalan bitta binoni ajratib olish uchun).
 
 Ishlatish:
 1. `PTAJRAT` buyrug'ini yozing.
-2. **Ichki** yopiq poliliniyani tanlang (qoldiriladigan soha chegarasi).
-3. **Tashqi** yopiq poliliniyani tanlang (tozalash sohasi chegarasi).
+2. **Ichki** poligonni **chizing** — nuqtalarni ketma-ket ko'rsating (qoldiriladigan soha), **Enter**.
+3. **Tashqi** poligonni **chizing** — nuqtalarni ko'rsating (tozalash chegarasi), **Enter**.
 
 Natija:
-- Ichki poligon **ichidagi** chizma/yozuvlar **qoladi**.
-- Ichki va tashqi poligonlar **orasidagi** (halqa) barcha obyektlar **o'chiriladi**.
-- Tashqi poligondan **tashqaridagi** obyektlar **tegilmaydi**.
-- Ikki poligonning o'zi (chegaralar) o'chirilmaydi.
+- Ichki poligon **ichida to'liq** joylashgan chizma/yozuvlar **qoladi**.
+- Ichki poligondan **tashqaridagi** barcha obyektlar (ichki chegarani **kesib o'tuvchilar ham**)
+  **o'chiriladi** — ammo faqat **tashqi poligon ichida** to'liq joylashganlari.
+- Tashqi poligondan **tashqaridagilar** (va tashqi chegarani kesib chiquvchilar) **tegilmaydi**.
+- Chizilgan poligonlar chizmada qolmaydi (vaqtinchalik).
 
-> Poligonlar **yopiq poliliniya** (LWPOLYLINE) bo'lishi kerak. Tashqi soha uchun oddiy
-> to'rtburchak (`RECTANG`) chizib olsangiz ham bo'ladi.
-> Ichki chegarani kesib o'tuvchi obyektlar (ehtiyot yuzasidan) saqlanadi.
+> Ichki poligonni saqlanadigan obyektlarni **to'liq o'rab** oladigan qilib chizing —
+> chegarani kesib o'tgan obyektlar ham o'chiriladi.
 
 > **Muhim:** menyu tugmalari `AdWindows.dll` sborkasiga bog'liq, u esa NuGet'da yo'q —
 > faqat AutoCAD o'rnatilgan papkada bo'ladi. Shuning uchun menyu paydo bo'lishi uchun
