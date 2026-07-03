@@ -45,7 +45,7 @@ Chegara uzunligi: <perimetr> m
 | `PTCHEGARA` | Nuqtalardan **chegaradoshlar jadvali** (faqat raqamlar). |
 | `PLCHEGARA` | Poliliniyadan **chegaradoshlar jadvali** (faqat raqamlar). |
 | `PTPOLIGON` | GPS nuqta bloklaridan tartib raqamlari bo'yicha **poligon** (yopiq poliliniya) yasash. |
-| `PTTOMORQA` | Yopiq maydondan ichkariga surilgan **Tomorqa** poligoni (punktir) + markazga "Tomorqa" yozuvi. |
+| `PTTOMORQA` | Yopiq maydondan ichkariga surilgan **Tomorqa** poligoni (nuqtali) + markazga "Tomorqa" yozuvi. |
 | `PTSOZLAMA` | Sozlamalar oynasi (matn balandligi, o'nlik xonalar, nuqta belgisi, jadval burchagi). |
 | `PTHAQIDA`  | Plagin va mualliflar haqida ("Haqida" oynasi). |
 | `PTLOAD`    | DLL ni qayta yuklash (LISP funksiyasi). |
@@ -137,11 +137,14 @@ Ishlatish:
 1. `PTTOMORQA` buyrug'ini yozing.
 2. Tomorqa maydoni **ichidan** bitta nuqta ko'rsating.
 3. Dastur chegarani avtomatik aniqlaydi (BOUNDARY kabi), undan ichkariga surilgan
-   **punktir** poligon chizadi va o'rtasiga "Tomorqa" yozadi.
+   **nuqtali (DOT)** poligon chizadi va o'rtasiga "Tomorqa" yozadi.
 
 **Sozlamalar** (`PTSOZLAMA`):
 - **Tomorqa ichkariga (m)** — tashqi chegaradan ichkariga masofa (standart `2`).
 - **Tomorqa matn balandligi** — "Tomorqa" yozuvi balandligi (standart `2.5`).
+- **Tomorqa burchaklari** — `Qirrali` (o'tkir) yoki `Yoysimon` (yumaloqlangan).
+- **Tomorqa chiziq masshtabi** — nuqtali chiziq masshtabi/LTSCALE (standart `1`; nuqtalar
+  ko'rinmasa yoki juda zich bo'lsa shu qiymatni o'zgartiring).
 
 > Nuqta ko'rsatilgan joy atrofi to'liq **yopiq** bo'lishi kerak (chiziqlar tutashgan).
 > Masofa maydonga nisbatan juda katta bo'lsa, ichki poligon yasalmaydi (ogohlantiradi).

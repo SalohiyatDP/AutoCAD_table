@@ -24,6 +24,13 @@ namespace SalohiyatDP.AutoCADTable
         BottomRight  // o'ng-pastki
     }
 
+    /// <summary>Tomorqa poligonining burchak ko'rinishi.</summary>
+    public enum TomorqaCornerStyle
+    {
+        Sharp, // qirrali (o'tkir burchak)
+        Arc    // yoysimon (yumaloqlangan)
+    }
+
     /// <summary>
     /// Plagin haqida ma'lumot (menyudagi "Haqida" bo'limi uchun).
     /// </summary>
@@ -62,6 +69,8 @@ namespace SalohiyatDP.AutoCADTable
         // Tomorqa yeri funksiyasi uchun
         public double TomorqaOffset { get; set; } = 2.0;       // tashqi chegaradan ichkariga (metr)
         public double TomorqaTextHeight { get; set; } = 2.5;   // "Tomorqa" yozuvi balandligi
+        public TomorqaCornerStyle TomorqaCorner { get; set; } = TomorqaCornerStyle.Sharp; // burchak turi
+        public double TomorqaLtScale { get; set; } = 1.0;      // nuqtali chiziq masshtabi (LTSCALE)
 
         private static string FilePath
         {

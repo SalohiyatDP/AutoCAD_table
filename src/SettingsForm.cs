@@ -23,6 +23,8 @@ namespace SalohiyatDP.AutoCADTable
         private TextBox _txtIjrochi;
         private TextBox _txtTomorqaOffset;
         private TextBox _txtTomorqaHeight;
+        private ComboBox _cmbTomorqaCorner;
+        private TextBox _txtTomorqaLtScale;
 
         public SettingsForm(PluginSettings settings)
         {
@@ -38,7 +40,7 @@ namespace SalohiyatDP.AutoCADTable
             StartPosition = FormStartPosition.CenterScreen;
             MaximizeBox = false;
             MinimizeBox = false;
-            ClientSize = new Size(500, 434);
+            ClientSize = new Size(500, 502);
             Font = new Font("Segoe UI", 9F);
 
             int labelX = 15;
@@ -97,6 +99,17 @@ namespace SalohiyatDP.AutoCADTable
             AddLabel("Tomorqa matn balandligi:", labelX, y + 3);
             _txtTomorqaHeight = new TextBox { Left = inputX, Top = y, Width = 120 };
             Controls.Add(_txtTomorqaHeight);
+            y += step;
+
+            AddLabel("Tomorqa burchaklari:", labelX, y + 3);
+            _cmbTomorqaCorner = new ComboBox { Left = inputX, Top = y, Width = 200, DropDownStyle = ComboBoxStyle.DropDownList };
+            _cmbTomorqaCorner.Items.AddRange(new object[] { "Qirrali", "Yoysimon" });
+            Controls.Add(_cmbTomorqaCorner);
+            y += step;
+
+            AddLabel("Tomorqa chiziq masshtabi:", labelX, y + 3);
+            _txtTomorqaLtScale = new TextBox { Left = inputX, Top = y, Width = 120 };
+            Controls.Add(_txtTomorqaLtScale);
             y += step + 12;
 
             var btnOk = new Button { Text = "Saqlash", Left = 300, Top = y, Width = 90, DialogResult = DialogResult.OK };
@@ -127,6 +140,8 @@ namespace SalohiyatDP.AutoCADTable
             _txtIjrochi.Text = _s.Ijrochi;
             _txtTomorqaOffset.Text = _s.TomorqaOffset.ToString(CultureInfo.InvariantCulture);
             _txtTomorqaHeight.Text = _s.TomorqaTextHeight.ToString(CultureInfo.InvariantCulture);
+            _cmbTomorqaCorner.SelectedIndex = (int)_s.TomorqaCorner; // Sharp=0, Arc=1
+            _txtTomorqaLtScale.Text = _s.TomorqaLtScale.ToString(CultureInfo.InvariantCulture);
         }
 
         private void OnSave(object sender, EventArgs e)
@@ -179,8 +194,20 @@ namespace SalohiyatDP.AutoCADTable
 
             _s.NeighborsColWidthFactor = (double)_numNeighborsWidth.Value;
             _s.Ijrochi = _txtIjrochi.Text.Trim();
+            double tls;
+            if (!double.TryParse(_txtTomorqaLtScale.Text.Replace(',', '.'),
+                    NumberStyles.Float, CultureInfo.InvariantCulture, out tls) || tls <= 0)
+            {
+                MessageBox.Show("Tomorqa chiziq masshtabi musbat son bo'lishi kerak.", "Xatolik",
+                    MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                DialogResult = DialogResult.None;
+                return;
+            }
+
             _s.TomorqaOffset = toff;
             _s.TomorqaTextHeight = tth;
+            _s.TomorqaCorner = (TomorqaCornerStyle)_cmbTomorqaCorner.SelectedIndex;
+            _s.TomorqaLtScale = tls;
             _s.Save();
         }
     }
