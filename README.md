@@ -47,6 +47,7 @@ Chegara uzunligi: <perimetr> m
 | `PTPOLIGON` | GPS nuqta bloklaridan tartib raqamlari bo'yicha **poligon** (yopiq poliliniya) yasash. |
 | `PTTOMORQA` | Yopiq maydondan ichkariga surilgan **Tomorqa** poligoni (nuqtali) + markazga "Tomorqa" yozuvi. |
 | `PTDEVOR`   | **Devor belgilash**: devor bo'ylab poliliniya + devor chiziq turi va masshtab (0.3). |
+| `PTAJRAT`   | **Poligondan ajratish**: ichki va tashqi poligon orasidagi chizma/yozuvlarni tozalash. |
 | `PTSOZLAMA` | Sozlamalar oynasi (matn balandligi, o'nlik xonalar, nuqta belgisi, jadval burchagi). |
 | `PTHAQIDA`  | Plagin va mualliflar haqida ("Haqida" oynasi). |
 | `PTLOAD`    | DLL ni qayta yuklash (LISP funksiyasi). |
@@ -70,7 +71,7 @@ Plagin yuklangach, AutoCAD lentasida (ribbon) **"SalohiyatTable"** yorlig'i payd
 - **"Sozlamalar"** paneli: **Sozlamalar** (`PTSOZLAMA`), **Haqida** (`PTHAQIDA`).
 
 - **"Chegaradoshlar"** paneli: **Chegaradoshlar (nuqtalardan)** (`PTCHEGARA`), **Chegaradoshlar (poliliniya)** (`PLCHEGARA`).
-- **"Poligon"** paneli: **Nuqtalardan poligon yaratish** (`PTPOLIGON`), **Tomorqa yaratish** (`PTTOMORQA`).
+- **"Poligon"** paneli: **Nuqtalardan poligon yaratish** (`PTPOLIGON`), **Tomorqa yaratish** (`PTTOMORQA`), **Poligondan ajratish** (`PTAJRAT`).
 - **"Devor"** paneli: **Devor belgilash** (`PTDEVOR`).
 
 **Mualliflar** ma'lumoti jadvalda emas — menyudagi **"Haqida"** oynasida ko'rsatiladi.
@@ -183,6 +184,28 @@ Ishlatish:
 > allaqachon yuklangan bo'lishi kerak. Aks holda poliliniya joriy chiziq turida chiziladi
 > (buyruq qatorida eslatma chiqadi) — bunda **Devor qatlami** ni o'sha chiziq turi biriktirilgan
 > qatlamga qo'ysangiz, BYLAYER orqali devor belgisi to'g'ri chiqadi.
+
+---
+
+## Poligondan ajratish (`PTAJRAT`)
+
+Ikki poligon orasidagi keraksiz chizma va yozuvlarni tozalaydi (masalan bitta binoni
+ajratib olish uchun).
+
+Ishlatish:
+1. `PTAJRAT` buyrug'ini yozing.
+2. **Ichki** yopiq poliliniyani tanlang (qoldiriladigan soha chegarasi).
+3. **Tashqi** yopiq poliliniyani tanlang (tozalash sohasi chegarasi).
+
+Natija:
+- Ichki poligon **ichidagi** chizma/yozuvlar **qoladi**.
+- Ichki va tashqi poligonlar **orasidagi** (halqa) barcha obyektlar **o'chiriladi**.
+- Tashqi poligondan **tashqaridagi** obyektlar **tegilmaydi**.
+- Ikki poligonning o'zi (chegaralar) o'chirilmaydi.
+
+> Poligonlar **yopiq poliliniya** (LWPOLYLINE) bo'lishi kerak. Tashqi soha uchun oddiy
+> to'rtburchak (`RECTANG`) chizib olsangiz ham bo'ladi.
+> Ichki chegarani kesib o'tuvchi obyektlar (ehtiyot yuzasidan) saqlanadi.
 
 > **Muhim:** menyu tugmalari `AdWindows.dll` sborkasiga bog'liq, u esa NuGet'da yo'q —
 > faqat AutoCAD o'rnatilgan papkada bo'ladi. Shuning uchun menyu paydo bo'lishi uchun

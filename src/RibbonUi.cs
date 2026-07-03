@@ -107,6 +107,12 @@ namespace SalohiyatDP.AutoCADTable
                 "Tomorqa\nyaratish", "PTTOMORQA",
                 "Yopiq maydondan ichkariga surilgan (sozlamadagi masofa) 'Tomorqa' poligonini yasash"));
 
+            sourceP.Items.Add(new RibbonSeparator());
+
+            sourceP.Items.Add(CreateButton(
+                "Poligondan\najratish", "PTAJRAT",
+                "Ichki va tashqi poligon orasidagi barcha chizma/yozuvlarni tozalash"));
+
             // Devor paneli
             var sourceD = new RibbonPanelSource { Title = "Devor" };
             var panelD = new RibbonPanel { Source = sourceD };
