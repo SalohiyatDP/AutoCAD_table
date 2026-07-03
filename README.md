@@ -196,15 +196,14 @@ Ishlatish:
 2. **Ichki** poligonni **chizing** — nuqtalarni ketma-ket ko'rsating (qoldiriladigan soha), **Enter**.
 3. **Tashqi** poligonni **chizing** — nuqtalarni ko'rsating (tozalash chegarasi), **Enter**.
 
-Natija:
-- Ichki poligon **ichida to'liq** joylashgan chizma/yozuvlar **qoladi**.
-- Ichki poligondan **tashqaridagi** barcha obyektlar (ichki chegarani **kesib o'tuvchilar ham**)
-  **o'chiriladi** — ammo faqat **tashqi poligon ichida** to'liq joylashganlari.
+Natija (tashqi poligon ichidagi obyektlar bo'yicha):
+- Ichki poligon **ichidagi** qismlar **qoladi**.
+- Ichki poligon **tashqarisidagi** qismlar **o'chiriladi**.
+- Ichki chegarani **kesib o'tgan** chiziqlar chegara bo'yicha **kesiladi** — ichki bo'lagi
+  qoladi, tashqi bo'lagi o'chadi.
+- Matn/blok kabi obyektlar joylashuviga qarab qoladi yoki o'chadi.
 - Tashqi poligondan **tashqaridagilar** (va tashqi chegarani kesib chiquvchilar) **tegilmaydi**.
 - Chizilgan poligonlar chizmada qolmaydi (vaqtinchalik).
-
-> Ichki poligonni saqlanadigan obyektlarni **to'liq o'rab** oladigan qilib chizing —
-> chegarani kesib o'tgan obyektlar ham o'chiriladi.
 
 > **Muhim:** menyu tugmalari `AdWindows.dll` sborkasiga bog'liq, u esa NuGet'da yo'q —
 > faqat AutoCAD o'rnatilgan papkada bo'ladi. Shuning uchun menyu paydo bo'lishi uchun

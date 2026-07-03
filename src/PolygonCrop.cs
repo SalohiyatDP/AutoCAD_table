@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.EditorInput;
@@ -12,13 +13,13 @@ using AcadDoc = Autodesk.AutoCAD.ApplicationServices.Document;
 namespace SalohiyatDP.AutoCADTable
 {
     /// <summary>
-    /// "Poligondan ajratish" funksiyasi. Foydalanuvchi avval ICHKI poligonni, so'ng TASHQI
-    /// poligonni CHIZADI (nuqtalarni ko'rsatib, Enter bilan tugatadi). Natijada:
-    ///   - ichki poligon ichida to'liq joylashgan chizma/yozuvlar QOLADI,
-    ///   - ichki poligondan tashqaridagi (ichki chegarani kesib o'tuvchilar ham) barcha
-    ///     obyektlar O'CHIRILADI, ammo faqat TASHQI poligon ichida,
-    ///   - tashqi poligondan tashqaridagilar TEGILMAYDI.
-    /// Chizilgan poligonlar vaqtinchalik (chizmada qolmaydi).
+    /// "Poligondan ajratish" funksiyasi. Foydalanuvchi avval ICHKI, so'ng TASHQI poligonni
+    /// CHIZADI (nuqtalarni ko'rsatib, Enter). Tashqi poligon ichidagi obyektlar quyidagicha
+    /// qayta ishlanadi:
+    ///   - ichki poligon ICHIDAGI qismlar QOLADI,
+    ///   - ichki poligon TASHQARISIDAGI qismlar O'CHIRILADI (chegarani kesib o'tgan chiziqlar
+    ///     ichki chegara bo'yicha KESILADI - ichki bo'lagi qoladi).
+    /// Tashqi poligondan tashqaridagilar tegilmaydi. Chizilgan poligonlar chizmada qolmaydi.
     /// </summary>
     public class CropCommands
     {
@@ -30,7 +31,6 @@ namespace SalohiyatDP.AutoCADTable
             Editor ed = doc.Editor;
             Database db = doc.Database;
 
-            // 1) Ichki poligonni chizish
             ed.WriteMessage("\n--- Ichki poligonni chizing (qoldiriladigan soha) ---");
             Point3dCollection innerPts = PickPolygon(ed, "Ichki poligon");
             if (innerPts == null || innerPts.Count < 3)
@@ -39,7 +39,6 @@ namespace SalohiyatDP.AutoCADTable
                 return;
             }
 
-            // 2) Tashqi poligonni chizish
             ed.WriteMessage("\n--- Tashqi poligonni chizing (tozalash chegarasi) ---");
             Point3dCollection outerPts = PickPolygon(ed, "Tashqi poligon");
             if (outerPts == null || outerPts.Count < 3)
@@ -48,19 +47,17 @@ namespace SalohiyatDP.AutoCADTable
                 return;
             }
 
-            int deleted = 0;
+            var innerPoly = ToList(innerPts);
+            int deleted = 0, trimmed = 0;
 
             using (doc.LockDocument())
             using (Transaction tr = db.TransactionManager.StartTransaction())
             {
-                // Tashqi poligon ichida TO'LIQ joylashgan obyektlar (o'chirishga nomzod).
-                // Tashqi chegarani kesib chiquvchilar tegilmaydi.
+                var bt = (BlockTable)tr.GetObject(db.BlockTableId, OpenMode.ForRead);
+                var ms = (BlockTableRecord)tr.GetObject(bt[BlockTableRecord.ModelSpace], OpenMode.ForWrite);
+
+                // Tashqi poligon ichida to'liq joylashgan obyektlar (qayta ishlash sohasi).
                 PromptSelectionResult inOuter = ed.SelectWindowPolygon(outerPts);
-
-                // Ichki poligon ichida TO'LIQ joylashgan obyektlar (saqlanadi).
-                // Ichki chegarani kesib o'tuvchilar saqlanmaydi -> o'chadi.
-                PromptSelectionResult inInner = ed.SelectWindowPolygon(innerPts);
-
                 if (inOuter.Status != PromptStatus.OK || inOuter.Value == null)
                 {
                     ed.WriteMessage("\nTashqi poligon ichida obyekt topilmadi.");
@@ -68,36 +65,169 @@ namespace SalohiyatDP.AutoCADTable
                     return;
                 }
 
-                var keep = new HashSet<ObjectId>();
-                if (inInner.Status == PromptStatus.OK && inInner.Value != null)
-                    foreach (SelectedObject so in inInner.Value)
-                        if (so != null) keep.Add(so.ObjectId);
-
-                foreach (SelectedObject so in inOuter.Value)
+                // Ichki poligonni kesish uchun vaqtinchalik (bazaga qo'shilmaydigan) poliliniya
+                using (var innerBoundary = MakePolyline(innerPts))
                 {
-                    if (so == null) continue;
-                    if (keep.Contains(so.ObjectId)) continue; // ichkaridagini saqlaymiz
-
-                    try
+                    foreach (SelectedObject so in inOuter.Value)
                     {
-                        var ent = tr.GetObject(so.ObjectId, OpenMode.ForWrite, false) as Entity;
-                        if (ent != null && !ent.IsErased)
+                        if (so == null) continue;
+                        try
                         {
-                            ent.Erase();
-                            deleted++;
+                            ProcessEntity(tr, ms, so.ObjectId, innerBoundary, innerPoly, ref deleted, ref trimmed);
                         }
-                    }
-                    catch
-                    {
-                        // Bloklangan qatlam yoki o'chirib bo'lmaydigan obyekt - o'tkazamiz.
+                        catch
+                        {
+                            // Bitta obyekt xato bersa - o'tkazamiz.
+                        }
                     }
                 }
 
                 tr.Commit();
             }
 
-            ed.WriteMessage("\nPoligondan ajratildi: " + deleted + " ta obyekt o'chirildi "
-                          + "(ichki poligon ichidagilar saqlab qolindi).");
+            ed.WriteMessage("\nPoligondan ajratildi: " + deleted + " ta obyekt o'chirildi, "
+                          + trimmed + " ta chiziq kesildi (ichki qismi qoldirildi).");
+        }
+
+        private static void ProcessEntity(Transaction tr, BlockTableRecord ms, ObjectId id,
+                                           Polyline innerBoundary, List<Point2d> innerPoly,
+                                           ref int deleted, ref int trimmed)
+        {
+            var ent = tr.GetObject(id, OpenMode.ForRead) as Entity;
+            if (ent == null || ent.IsErased) return;
+
+            var curve = ent as Curve;
+            bool splittable = curve != null &&
+                              (curve is Line || curve is Arc || curve is Polyline ||
+                               curve is Polyline2d || curve is Circle || curve is Ellipse);
+
+            if (splittable)
+            {
+                var ips = new Point3dCollection();
+                curve.IntersectWith(innerBoundary, Intersect.OnBothOperands, ips, IntPtr.Zero, IntPtr.Zero);
+
+                if (ips.Count == 0)
+                {
+                    // Kesishmaydi: to'liq ichkarida yoki to'liq tashqarida
+                    if (!IsInside(MidPoint(curve), innerPoly))
+                    {
+                        Erase(tr, id);
+                        deleted++;
+                    }
+                    return;
+                }
+
+                // Kesishadi: bo'laklarga bo'lamiz, ichkaridagilarini qoldiramiz
+                DBObjectCollection pieces = null;
+                try { pieces = curve.GetSplitCurves(ips); } catch { pieces = null; }
+
+                if (pieces == null || pieces.Count == 0)
+                {
+                    // Bo'lib bo'lmadi - butun holida ichkarida bo'lsa qoldiramiz, aks holda o'chiramiz
+                    if (!IsInside(MidPoint(curve), innerPoly)) { Erase(tr, id); deleted++; }
+                    return;
+                }
+
+                bool anyKept = false;
+                foreach (DBObject o in pieces)
+                {
+                    var piece = o as Curve;
+                    if (piece == null) { SafeDispose(o); continue; }
+
+                    if (IsInside(MidPoint(piece), innerPoly))
+                    {
+                        piece.SetPropertiesFrom(ent);
+                        ms.AppendEntity(piece);
+                        tr.AddNewlyCreatedDBObject(piece, true);
+                        anyKept = true;
+                    }
+                    else
+                    {
+                        SafeDispose(o);
+                    }
+                }
+
+                Erase(tr, id); // asl obyekt o'rniga bo'laklar qoldi
+                if (anyKept) trimmed++; else deleted++;
+            }
+            else
+            {
+                // Matn/blok/boshqa: joylashuviga qarab qoldiramiz yoki o'chiramiz
+                Point3d refPt = RefPoint(ent);
+                if (!IsInside(refPt, innerPoly))
+                {
+                    Erase(tr, id);
+                    deleted++;
+                }
+            }
+        }
+
+        private static void Erase(Transaction tr, ObjectId id)
+        {
+            var e = tr.GetObject(id, OpenMode.ForWrite, false) as Entity;
+            if (e != null && !e.IsErased) e.Erase();
+        }
+
+        private static Point3d MidPoint(Curve c)
+        {
+            try { return c.GetPointAtParameter((c.StartParam + c.EndParam) / 2.0); }
+            catch
+            {
+                try { return c.StartPoint; } catch { return Point3d.Origin; }
+            }
+        }
+
+        private static Point3d RefPoint(Entity ent)
+        {
+            var t = ent as DBText;
+            if (t != null) return t.Position;
+            var m = ent as MText;
+            if (m != null) return m.Location;
+            var br = ent as BlockReference;
+            if (br != null) return br.Position;
+            try
+            {
+                Extents3d ex = ent.GeometricExtents;
+                return new Point3d((ex.MinPoint.X + ex.MaxPoint.X) / 2.0,
+                                   (ex.MinPoint.Y + ex.MaxPoint.Y) / 2.0, 0.0);
+            }
+            catch { return Point3d.Origin; }
+        }
+
+        private static bool IsInside(Point3d p, List<Point2d> poly)
+        {
+            bool inside = false;
+            int n = poly.Count;
+            for (int i = 0, j = n - 1; i < n; j = i++)
+            {
+                double xi = poly[i].X, yi = poly[i].Y, xj = poly[j].X, yj = poly[j].Y;
+                bool cross = ((yi > p.Y) != (yj > p.Y)) &&
+                             (p.X < (xj - xi) * (p.Y - yi) / (yj - yi) + xi);
+                if (cross) inside = !inside;
+            }
+            return inside;
+        }
+
+        private static List<Point2d> ToList(Point3dCollection pts)
+        {
+            var list = new List<Point2d>(pts.Count);
+            foreach (Point3d p in pts) list.Add(new Point2d(p.X, p.Y));
+            return list;
+        }
+
+        private static Polyline MakePolyline(Point3dCollection pts)
+        {
+            var pl = new Polyline();
+            for (int i = 0; i < pts.Count; i++)
+                pl.AddVertexAt(i, new Point2d(pts[i].X, pts[i].Y), 0.0, 0.0, 0.0);
+            pl.Closed = true;
+            return pl;
+        }
+
+        private static void SafeDispose(DBObject o)
+        {
+            try { if (o != null && !o.IsDisposed && o.ObjectId.IsNull) o.Dispose(); }
+            catch { }
         }
 
         /// <summary>Foydalanuvchi nuqtalarni ketma-ket ko'rsatib poligon chizadi (Enter - tugatish).</summary>
