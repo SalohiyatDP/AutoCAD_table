@@ -192,9 +192,10 @@ Ishlatish:
 Keraksiz chizma va yozuvlarni tozalaydi (masalan bitta binoni ajratib olish uchun).
 
 Ishlatish:
-1. `PTAJRAT` buyrug'ini yozing.
-2. **Ichki** poligonni **chizing** — nuqtalarni ketma-ket ko'rsating (qoldiriladigan soha), **Enter**.
-3. **Tashqi** poligonni **chizing** — nuqtalarni ko'rsating (tozalash chegarasi), **Enter**.
+1. Avval **ichki** va **tashqi** yopiq poliliniyalarni chizib oling (masalan `PLINE` yoki `RECTANG`).
+2. `PTAJRAT` buyrug'ini yozing.
+3. **Ichki** poliliniyani tanlang (qoldiriladigan soha chegarasi).
+4. **Tashqi** poliliniyani tanlang (tozalash chegarasi).
 
 Natija (tashqi poligon ichidagi obyektlar bo'yicha):
 - Ichki poligon **ichidagi** qismlar **qoladi**.
@@ -203,7 +204,7 @@ Natija (tashqi poligon ichidagi obyektlar bo'yicha):
   qoladi, tashqi bo'lagi o'chadi.
 - Matn/blok kabi obyektlar joylashuviga qarab qoladi yoki o'chadi.
 - Tashqi poligondan **tashqaridagilar** (va tashqi chegarani kesib chiquvchilar) **tegilmaydi**.
-- Chizilgan poligonlar chizmada qolmaydi (vaqtinchalik).
+- Ikki poligonning o'zi (chegaralar) o'chirilmaydi — kerak bo'lsa qo'lda o'chirasiz.
 
 > **Muhim:** menyu tugmalari `AdWindows.dll` sborkasiga bog'liq, u esa NuGet'da yo'q —
 > faqat AutoCAD o'rnatilgan papkada bo'ladi. Shuning uchun menyu paydo bo'lishi uchun
