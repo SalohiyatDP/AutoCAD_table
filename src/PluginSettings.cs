@@ -70,6 +70,7 @@ namespace SalohiyatDP.AutoCADTable
         public double TomorqaOffset { get; set; } = 2.0;       // tashqi chegaradan ichkariga (metr)
         public double TomorqaTextHeight { get; set; } = 2.5;   // "Tomorqa" yozuvi balandligi
         public TomorqaCornerStyle TomorqaCorner { get; set; } = TomorqaCornerStyle.Sharp; // burchak turi
+        public double TomorqaArcRadius { get; set; } = 2.0;    // yoysimon burchak radiusi
         public double TomorqaLtScale { get; set; } = 1.0;      // nuqtali chiziq masshtabi (LTSCALE)
 
         private static string FilePath

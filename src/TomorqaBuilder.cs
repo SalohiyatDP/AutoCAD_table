@@ -35,6 +35,7 @@ namespace SalohiyatDP.AutoCADTable
             double offset = s.TomorqaOffset > 0 ? s.TomorqaOffset : 2.0;
             double th = s.TomorqaTextHeight > 0 ? s.TomorqaTextHeight : 2.5;
             bool arcCorners = s.TomorqaCorner == TomorqaCornerStyle.Arc;
+            double arcRadius = s.TomorqaArcRadius > 0 ? s.TomorqaArcRadius : offset;
             double ltScale = s.TomorqaLtScale > 0 ? s.TomorqaLtScale : 1.0;
 
             PromptPointResult ppr = ed.GetPoint("\nTomorqa maydoni ichidan nuqta ko'rsating: ");
@@ -94,7 +95,7 @@ namespace SalohiyatDP.AutoCADTable
                     Polyline draw = p;
                     if (arcCorners)
                     {
-                        Polyline fp = FilletPolyline(p, offset);
+                        Polyline fp = FilletPolyline(p, arcRadius);
                         if (fp != null) { SafeDispose(p); draw = fp; }
                     }
 

@@ -143,6 +143,7 @@ Ishlatish:
 - **Tomorqa ichkariga (m)** — tashqi chegaradan ichkariga masofa (standart `2`).
 - **Tomorqa matn balandligi** — "Tomorqa" yozuvi balandligi (standart `2.5`).
 - **Tomorqa burchaklari** — `Qirrali` (o'tkir) yoki `Yoysimon` (yumaloqlangan).
+- **Tomorqa yoy radiusi** — `Yoysimon` tanlanganda burchak yoyining radiusi (standart `2`).
 - **Tomorqa chiziq masshtabi** — nuqtali chiziq masshtabi/LTSCALE (standart `1`; nuqtalar
   ko'rinmasa yoki juda zich bo'lsa shu qiymatni o'zgartiring).
 

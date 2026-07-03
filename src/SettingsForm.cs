@@ -24,6 +24,7 @@ namespace SalohiyatDP.AutoCADTable
         private TextBox _txtTomorqaOffset;
         private TextBox _txtTomorqaHeight;
         private ComboBox _cmbTomorqaCorner;
+        private TextBox _txtTomorqaArcRadius;
         private TextBox _txtTomorqaLtScale;
 
         public SettingsForm(PluginSettings settings)
@@ -40,7 +41,7 @@ namespace SalohiyatDP.AutoCADTable
             StartPosition = FormStartPosition.CenterScreen;
             MaximizeBox = false;
             MinimizeBox = false;
-            ClientSize = new Size(500, 502);
+            ClientSize = new Size(500, 536);
             Font = new Font("Segoe UI", 9F);
 
             int labelX = 15;
@@ -107,6 +108,11 @@ namespace SalohiyatDP.AutoCADTable
             Controls.Add(_cmbTomorqaCorner);
             y += step;
 
+            AddLabel("Tomorqa yoy radiusi:", labelX, y + 3);
+            _txtTomorqaArcRadius = new TextBox { Left = inputX, Top = y, Width = 120 };
+            Controls.Add(_txtTomorqaArcRadius);
+            y += step;
+
             AddLabel("Tomorqa chiziq masshtabi:", labelX, y + 3);
             _txtTomorqaLtScale = new TextBox { Left = inputX, Top = y, Width = 120 };
             Controls.Add(_txtTomorqaLtScale);
@@ -141,6 +147,7 @@ namespace SalohiyatDP.AutoCADTable
             _txtTomorqaOffset.Text = _s.TomorqaOffset.ToString(CultureInfo.InvariantCulture);
             _txtTomorqaHeight.Text = _s.TomorqaTextHeight.ToString(CultureInfo.InvariantCulture);
             _cmbTomorqaCorner.SelectedIndex = (int)_s.TomorqaCorner; // Sharp=0, Arc=1
+            _txtTomorqaArcRadius.Text = _s.TomorqaArcRadius.ToString(CultureInfo.InvariantCulture);
             _txtTomorqaLtScale.Text = _s.TomorqaLtScale.ToString(CultureInfo.InvariantCulture);
         }
 
@@ -204,9 +211,20 @@ namespace SalohiyatDP.AutoCADTable
                 return;
             }
 
+            double tar;
+            if (!double.TryParse(_txtTomorqaArcRadius.Text.Replace(',', '.'),
+                    NumberStyles.Float, CultureInfo.InvariantCulture, out tar) || tar <= 0)
+            {
+                MessageBox.Show("Tomorqa yoy radiusi musbat son bo'lishi kerak.", "Xatolik",
+                    MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                DialogResult = DialogResult.None;
+                return;
+            }
+
             _s.TomorqaOffset = toff;
             _s.TomorqaTextHeight = tth;
             _s.TomorqaCorner = (TomorqaCornerStyle)_cmbTomorqaCorner.SelectedIndex;
+            _s.TomorqaArcRadius = tar;
             _s.TomorqaLtScale = tls;
             _s.Save();
         }
