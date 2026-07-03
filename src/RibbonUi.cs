@@ -101,6 +101,12 @@ namespace SalohiyatDP.AutoCADTable
                 "Nuqtalardan\npoligon yaratish", "PTPOLIGON",
                 "GPS nuqta raqamlari (masalan 145-165, 171, 182-260) bo'yicha poligon yasash"));
 
+            sourceP.Items.Add(new RibbonSeparator());
+
+            sourceP.Items.Add(CreateButton(
+                "Tomorqa\nyaratish", "PTTOMORQA",
+                "Yopiq maydondan ichkariga surilgan (sozlamadagi masofa) 'Tomorqa' poligonini yasash"));
+
             // Ikkinchi panel: Sozlamalar va Haqida
             var source2 = new RibbonPanelSource { Title = "Sozlamalar" };
             var panel2 = new RibbonPanel { Source = source2 };

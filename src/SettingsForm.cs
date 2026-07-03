@@ -21,6 +21,8 @@ namespace SalohiyatDP.AutoCADTable
         private NumericUpDown _numNeighborsWidth;
         private TextBox _txtNeighborsHeight;
         private TextBox _txtIjrochi;
+        private TextBox _txtTomorqaOffset;
+        private TextBox _txtTomorqaHeight;
 
         public SettingsForm(PluginSettings settings)
         {
@@ -36,7 +38,7 @@ namespace SalohiyatDP.AutoCADTable
             StartPosition = FormStartPosition.CenterScreen;
             MaximizeBox = false;
             MinimizeBox = false;
-            ClientSize = new Size(500, 366);
+            ClientSize = new Size(500, 434);
             Font = new Font("Segoe UI", 9F);
 
             int labelX = 15;
@@ -85,6 +87,16 @@ namespace SalohiyatDP.AutoCADTable
             AddLabel("Ijrochi:", labelX, y + 3);
             _txtIjrochi = new TextBox { Left = inputX, Top = y, Width = 260 };
             Controls.Add(_txtIjrochi);
+            y += step;
+
+            AddLabel("Tomorqa ichkariga (m):", labelX, y + 3);
+            _txtTomorqaOffset = new TextBox { Left = inputX, Top = y, Width = 120 };
+            Controls.Add(_txtTomorqaOffset);
+            y += step;
+
+            AddLabel("Tomorqa matn balandligi:", labelX, y + 3);
+            _txtTomorqaHeight = new TextBox { Left = inputX, Top = y, Width = 120 };
+            Controls.Add(_txtTomorqaHeight);
             y += step + 12;
 
             var btnOk = new Button { Text = "Saqlash", Left = 300, Top = y, Width = 90, DialogResult = DialogResult.OK };
@@ -113,6 +125,8 @@ namespace SalohiyatDP.AutoCADTable
             _txtNeighborsHeight.Text = _s.NeighborsTextHeight.ToString(CultureInfo.InvariantCulture);
             _numNeighborsWidth.Value = (decimal)Math.Max(4.0, Math.Min(80.0, _s.NeighborsColWidthFactor));
             _txtIjrochi.Text = _s.Ijrochi;
+            _txtTomorqaOffset.Text = _s.TomorqaOffset.ToString(CultureInfo.InvariantCulture);
+            _txtTomorqaHeight.Text = _s.TomorqaTextHeight.ToString(CultureInfo.InvariantCulture);
         }
 
         private void OnSave(object sender, EventArgs e)
@@ -143,8 +157,30 @@ namespace SalohiyatDP.AutoCADTable
             _s.Anchor = (TableAnchor)_cmbAnchor.SelectedIndex;
             _s.NeighborsAnchor = (TableAnchor)_cmbNeighborsAnchor.SelectedIndex;
             _s.NeighborsTextHeight = nh;
+            double toff;
+            if (!double.TryParse(_txtTomorqaOffset.Text.Replace(',', '.'),
+                    NumberStyles.Float, CultureInfo.InvariantCulture, out toff) || toff <= 0)
+            {
+                MessageBox.Show("Tomorqa masofasi (ichkariga) musbat son bo'lishi kerak.", "Xatolik",
+                    MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                DialogResult = DialogResult.None;
+                return;
+            }
+
+            double tth;
+            if (!double.TryParse(_txtTomorqaHeight.Text.Replace(',', '.'),
+                    NumberStyles.Float, CultureInfo.InvariantCulture, out tth) || tth <= 0)
+            {
+                MessageBox.Show("Tomorqa matn balandligi musbat son bo'lishi kerak.", "Xatolik",
+                    MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                DialogResult = DialogResult.None;
+                return;
+            }
+
             _s.NeighborsColWidthFactor = (double)_numNeighborsWidth.Value;
             _s.Ijrochi = _txtIjrochi.Text.Trim();
+            _s.TomorqaOffset = toff;
+            _s.TomorqaTextHeight = tth;
             _s.Save();
         }
     }

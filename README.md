@@ -45,6 +45,7 @@ Chegara uzunligi: <perimetr> m
 | `PTCHEGARA` | Nuqtalardan **chegaradoshlar jadvali** (faqat raqamlar). |
 | `PLCHEGARA` | Poliliniyadan **chegaradoshlar jadvali** (faqat raqamlar). |
 | `PTPOLIGON` | GPS nuqta bloklaridan tartib raqamlari bo'yicha **poligon** (yopiq poliliniya) yasash. |
+| `PTTOMORQA` | Yopiq maydondan ichkariga surilgan **Tomorqa** poligoni (punktir) + markazga "Tomorqa" yozuvi. |
 | `PTSOZLAMA` | Sozlamalar oynasi (matn balandligi, o'nlik xonalar, nuqta belgisi, jadval burchagi). |
 | `PTHAQIDA`  | Plagin va mualliflar haqida ("Haqida" oynasi). |
 | `PTLOAD`    | DLL ni qayta yuklash (LISP funksiyasi). |
@@ -68,7 +69,7 @@ Plagin yuklangach, AutoCAD lentasida (ribbon) **"SalohiyatTable"** yorlig'i payd
 - **"Sozlamalar"** paneli: **Sozlamalar** (`PTSOZLAMA`), **Haqida** (`PTHAQIDA`).
 
 - **"Chegaradoshlar"** paneli: **Chegaradoshlar (nuqtalardan)** (`PTCHEGARA`), **Chegaradoshlar (poliliniya)** (`PLCHEGARA`).
-- **"Poligon"** paneli: **Nuqtalardan poligon yaratish** (`PTPOLIGON`).
+- **"Poligon"** paneli: **Nuqtalardan poligon yaratish** (`PTPOLIGON`), **Tomorqa yaratish** (`PTTOMORQA`).
 
 **Mualliflar** ma'lumoti jadvalda emas — menyudagi **"Haqida"** oynasida ko'rsatiladi.
 
@@ -124,6 +125,26 @@ Ishlatish:
 > Raqamli matn (sof butun son, masalan `757`) o'ziga **eng yaqin `POINT`** ga bog'lanadi;
 > o'nlik balandlik (`874.77`) yoki matnli tavsif (`Kõca bowi`) raqam deb olinmaydi.
 > Yasalgan poligonni keyin `PLTABLE` yoki `PLCHEGARA` bilan jadvalga aylantirish mumkin.
+
+---
+
+## Tomorqa yeri yasash (`PTTOMORQA`)
+
+Yopiq (atrofi o'ralgan) maydonning tashqi chegarasidan **ichkariga** ma'lum masofaga
+surilgan poligon chizadi va markaziga **"Tomorqa"** deb yozadi.
+
+Ishlatish:
+1. `PTTOMORQA` buyrug'ini yozing.
+2. Tomorqa maydoni **ichidan** bitta nuqta ko'rsating.
+3. Dastur chegarani avtomatik aniqlaydi (BOUNDARY kabi), undan ichkariga surilgan
+   **punktir** poligon chizadi va o'rtasiga "Tomorqa" yozadi.
+
+**Sozlamalar** (`PTSOZLAMA`):
+- **Tomorqa ichkariga (m)** — tashqi chegaradan ichkariga masofa (standart `2`).
+- **Tomorqa matn balandligi** — "Tomorqa" yozuvi balandligi (standart `2.5`).
+
+> Nuqta ko'rsatilgan joy atrofi to'liq **yopiq** bo'lishi kerak (chiziqlar tutashgan).
+> Masofa maydonga nisbatan juda katta bo'lsa, ichki poligon yasalmaydi (ogohlantiradi).
 
 > **Muhim:** menyu tugmalari `AdWindows.dll` sborkasiga bog'liq, u esa NuGet'da yo'q —
 > faqat AutoCAD o'rnatilgan papkada bo'ladi. Shuning uchun menyu paydo bo'lishi uchun

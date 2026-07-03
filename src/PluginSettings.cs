@@ -59,6 +59,10 @@ namespace SalohiyatDP.AutoCADTable
         // Chegaradoshlar ("Chegaradoshlar" ustuni) kengligi - matn balandligiga nisbatan
         public double NeighborsColWidthFactor { get; set; } = 16.0;
 
+        // Tomorqa yeri funksiyasi uchun
+        public double TomorqaOffset { get; set; } = 2.0;       // tashqi chegaradan ichkariga (metr)
+        public double TomorqaTextHeight { get; set; } = 2.5;   // "Tomorqa" yozuvi balandligi
+
         private static string FilePath
         {
             get
