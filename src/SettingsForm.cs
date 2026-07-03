@@ -36,6 +36,7 @@ namespace SalohiyatDP.AutoCADTable
         private TextBox _txtDevorLinetype;
         private TextBox _txtDevorLtScale;
         private TextBox _txtDevorLayer;
+        private TextBox _txtDevorWidth;
         private CheckBox _chkDevorReverse;
 
         private const int LabelX = 15;
@@ -159,9 +160,12 @@ namespace SalohiyatDP.AutoCADTable
             _txtDevorLayer = new TextBox { Width = 250 };
             AddRow(page, ref y, "Qatlam (layer):", _txtDevorLayer);
 
+            _txtDevorWidth = new TextBox { Width = 120 };
+            AddRow(page, ref y, "Devor eni (masofa, 0=yo'q):", _txtDevorWidth);
+
             _chkDevorReverse = new CheckBox
             {
-                Text = "Belgini qarama-qarshi tomonga (teskari)",
+                Text = "Ikkinchi chiziqni qarama-qarshi tomonga",
                 Left = LabelX,
                 Top = y,
                 AutoSize = true
@@ -201,6 +205,7 @@ namespace SalohiyatDP.AutoCADTable
             _txtDevorLinetype.Text = _s.DevorLinetype;
             _txtDevorLtScale.Text = _s.DevorLtScale.ToString(CultureInfo.InvariantCulture);
             _txtDevorLayer.Text = _s.DevorLayer;
+            _txtDevorWidth.Text = _s.DevorWidth.ToString(CultureInfo.InvariantCulture);
             _chkDevorReverse.Checked = _s.DevorReverse;
         }
 
@@ -227,6 +232,9 @@ namespace SalohiyatDP.AutoCADTable
             double dls;
             if (!TryPositive(_txtDevorLtScale.Text, out dls)) { Warn("Devor chiziq masshtabi musbat son bo'lishi kerak."); return; }
 
+            double dw;
+            if (!TryNonNegative(_txtDevorWidth.Text, out dw)) { Warn("Devor eni (masofa) manfiy bo'lmasligi kerak (0 = ikkinchi chiziq yo'q)."); return; }
+
             _s.TextHeight = h;
             _s.Decimals = (int)_numDecimals.Value;
             _s.Marker = (MarkerType)_cmbMarker.SelectedIndex;
@@ -246,6 +254,7 @@ namespace SalohiyatDP.AutoCADTable
             _s.DevorLinetype = _txtDevorLinetype.Text.Trim();
             _s.DevorLtScale = dls;
             _s.DevorLayer = _txtDevorLayer.Text.Trim();
+            _s.DevorWidth = dw;
             _s.DevorReverse = _chkDevorReverse.Checked;
 
             _s.Save();
@@ -255,6 +264,12 @@ namespace SalohiyatDP.AutoCADTable
         {
             return double.TryParse((text ?? "").Replace(',', '.'),
                        NumberStyles.Float, CultureInfo.InvariantCulture, out value) && value > 0;
+        }
+
+        private static bool TryNonNegative(string text, out double value)
+        {
+            return double.TryParse((text ?? "").Replace(',', '.'),
+                       NumberStyles.Float, CultureInfo.InvariantCulture, out value) && value >= 0;
         }
 
         private void Warn(string message)

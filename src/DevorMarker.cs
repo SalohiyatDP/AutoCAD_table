@@ -31,6 +31,8 @@ namespace SalohiyatDP.AutoCADTable
             string ltName = (s.DevorLinetype ?? "").Trim();
             double ltScale = s.DevorLtScale > 0 ? s.DevorLtScale : 0.3;
             string layer = (s.DevorLayer ?? "").Trim();
+            double width = s.DevorWidth;      // ikkinchi parallel chiziqgacha masofa (0 = yo'q)
+            bool reverse = s.DevorReverse;    // ikkinchi chiziq tomonini almashtirish
 
             // Devor bo'ylab nuqtalar (mavjud PointCollector ni qayta ishlatamiz)
             List<Point2d> pts = PointCollector.PickPoints(ed);
@@ -39,11 +41,6 @@ namespace SalohiyatDP.AutoCADTable
                 ed.WriteMessage("\nKamida 2 ta nuqta kerak. Buyruq bekor qilindi.");
                 return;
             }
-
-            // Devor belgisini qarama-qarshi tomonga chiqarish: poliliniya yo'nalishini teskari
-            // qilamiz (chiziq turidagi tishchalar boshqa tomonga o'tadi).
-            if (s.DevorReverse)
-                pts.Reverse();
 
             // Chiziq turini oldindan mavjud qilamiz (kerak bo'lsa yuklaymiz)
             bool ltAvailable = ltName.Length > 0 && EnsureLinetype(db, ltName);
@@ -57,6 +54,7 @@ namespace SalohiyatDP.AutoCADTable
                 if (layer.Length > 0)
                     EnsureLayer(tr, db, layer);
 
+                // 1) Asosiy chiziq (devor chiziq turi bilan)
                 var pl = new Polyline();
                 pl.SetDatabaseDefaults();
                 for (int i = 0; i < pts.Count; i++)
@@ -70,13 +68,44 @@ namespace SalohiyatDP.AutoCADTable
                 ms.AppendEntity(pl);
                 tr.AddNewlyCreatedDBObject(pl, true);
 
+                // 2) Ikkinchi parallel chiziq (eni masofasida) - oddiy (Continuous)
+                if (width > 0.0)
+                {
+                    DBObjectCollection off = null;
+                    try { off = pl.GetOffsetCurves(reverse ? -width : width); }
+                    catch { off = null; }
+
+                    if (off != null)
+                    {
+                        foreach (DBObject o in off)
+                        {
+                            var p2 = o as Polyline;
+                            if (p2 == null) { SafeDispose(o); continue; }
+
+                            if (layer.Length > 0) p2.Layer = layer;
+                            try { p2.Linetype = "Continuous"; } catch { }
+                            p2.LinetypeScale = 1.0;
+
+                            ms.AppendEntity(p2);
+                            tr.AddNewlyCreatedDBObject(p2, true);
+                        }
+                    }
+                }
+
                 tr.Commit();
             }
 
-            ed.WriteMessage("\nDevor belgilandi (" + pts.Count + " nuqta, masshtab " + ltScale + ").");
+            ed.WriteMessage("\nDevor belgilandi (" + pts.Count + " nuqta, masshtab " + ltScale
+                          + (width > 0.0 ? ", eni " + width : "") + ").");
             if (ltName.Length > 0 && !ltAvailable)
                 ed.WriteMessage("\nEslatma: '" + ltName + "' chiziq turi topilmadi. Poliliniya joriy chiziq "
                               + "turida chizildi. Sozlamadagi (PTSOZLAMA) nomni tekshiring.");
+        }
+
+        private static void SafeDispose(DBObject o)
+        {
+            try { if (o != null && !o.IsDisposed && o.ObjectId.IsNull) o.Dispose(); }
+            catch { }
         }
 
         /// <summary>Chiziq turini tekshiradi; bo'lmasa acad.lin/acadiso.lin dan yuklashga urinadi.</summary>

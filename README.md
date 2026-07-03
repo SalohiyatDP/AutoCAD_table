@@ -170,9 +170,11 @@ Ishlatish:
 - **Devor chiziq masshtabi** — chiziq turi masshtabi (standart `0.3`).
 - **Devor qatlami (layer)** — poliliniya joylanadigan qatlam (bo'sh = joriy qatlam;
   mavjud bo'lmasa avtomatik yaratiladi).
-- **Belgini qarama-qarshi tomonga (teskari)** — devor chiziq turidagi tishchalar
-  bir tomonga qaraydi; bu belgi yoqilsa poliliniya yo'nalishi teskarilanadi va
-  tishchalar qarama-qarshi tomonga o'tadi.
+- **Devor eni (masofa)** — asosiy chiziqdan **ikkinchi parallel chiziq**gacha masofa.
+  `0` bo'lsa ikkinchi chiziq chizilmaydi. Ikkinchi chiziq shtrix (tishcha) tomoniga
+  qo'yilsa, shtrixlar ikki chiziq orasida "devor" ko'rinishini beradi.
+- **Ikkinchi chiziqni qarama-qarshi tomonga** — ikkinchi parallel chiziq qaysi tomonda
+  bo'lishini almashtiradi (shtrixlar orasida chiqishi uchun mos tomonni tanlang).
 
 > **Sozlamalar oynasi** endi tablarga bo'lingan: **Jadval / Chegaradoshlar / Tomorqa / Devor**.
 > Har bir funksiya sozlamasi o'z tabida.
