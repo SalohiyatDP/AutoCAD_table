@@ -107,9 +107,10 @@ Sarlavha qatorlari balandligi ham matnga (o'ralgan satr soniga) moslashadi.
 
 ## Nuqtalardan poligon yasash (`PTPOLIGON`)
 
-GPS qurilmasidan olingan nuqtalar chizmada **atributli blok** ko'rinishida bo'lib, har birida
-**tartib raqami** (butun son), tavsif va balandlik atributlari bo'ladi. `PTPOLIGON` buyrug'i
-kiritilgan raqamli nuqtalarni **ketma-ket tutashtirib yopiq poliliniya (poligon)** yasaydi.
+GPS qurilmasidan olingan nuqtalar chizmada odatda **`POINT` (Точка) obyekti** bo'lib, yonida
+**tartib raqami** yozilgan matn (DBText/MText) turadi (raqam, tavsif, balandlik). `PTPOLIGON`
+buyrug'i kiritilgan raqamli nuqtalarni **ketma-ket tutashtirib yopiq poliliniya (poligon)**
+yasaydi. (Nuqtalar atributli blok bo'lsa — butun sonli atribut raqam sifatida olinadi.)
 
 Ishlatish:
 1. `PTPOLIGON` buyrug'ini yozing.
@@ -119,9 +120,9 @@ Ishlatish:
 3. Shu raqamli nuqtalar (blok insert nuqtalari) berilgan tartibda tutashtirilib poligon chiziladi.
 4. Topilmagan raqamlar (agar bo'lsa) buyruq qatorida ko'rsatiladi.
 
-> Har bir blokning **butun sonli** atributi tartib raqami deb olinadi (o'nlik balandlik
-> yoki matnli tavsif hisobga olinmaydi). Yasalgan poligonni keyin `PLTABLE` yoki `PLCHEGARA`
-> bilan jadvalga aylantirish mumkin.
+> Raqamli matn (sof butun son, masalan `757`) o'ziga **eng yaqin `POINT`** ga bog'lanadi;
+> o'nlik balandlik (`874.77`) yoki matnli tavsif (`Kõca bowi`) raqam deb olinmaydi.
+> Yasalgan poligonni keyin `PLTABLE` yoki `PLCHEGARA` bilan jadvalga aylantirish mumkin.
 
 > **Muhim:** menyu tugmalari `AdWindows.dll` sborkasiga bog'liq, u esa NuGet'da yo'q —
 > faqat AutoCAD o'rnatilgan papkada bo'ladi. Shuning uchun menyu paydo bo'lishi uchun
