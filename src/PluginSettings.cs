@@ -77,6 +77,7 @@ namespace SalohiyatDP.AutoCADTable
         public string DevorLinetype { get; set; } = "";       // devor chiziq turi nomi (bo'sh = joriy/BYLAYER)
         public double DevorLtScale { get; set; } = 0.3;        // devor chiziq masshtabi
         public string DevorLayer { get; set; } = "";           // devor qatlami (bo'sh = joriy qatlam)
+        public bool DevorReverse { get; set; } = false;         // devor belgisini qarama-qarshi tomonga (yo'nalishni teskari)
 
         private static string FilePath
         {

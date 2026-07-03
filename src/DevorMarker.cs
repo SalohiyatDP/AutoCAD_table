@@ -40,6 +40,11 @@ namespace SalohiyatDP.AutoCADTable
                 return;
             }
 
+            // Devor belgisini qarama-qarshi tomonga chiqarish: poliliniya yo'nalishini teskari
+            // qilamiz (chiziq turidagi tishchalar boshqa tomonga o'tadi).
+            if (s.DevorReverse)
+                pts.Reverse();
+
             // Chiziq turini oldindan mavjud qilamiz (kerak bo'lsa yuklaymiz)
             bool ltAvailable = ltName.Length > 0 && EnsureLinetype(db, ltName);
 

@@ -170,6 +170,12 @@ Ishlatish:
 - **Devor chiziq masshtabi** — chiziq turi masshtabi (standart `0.3`).
 - **Devor qatlami (layer)** — poliliniya joylanadigan qatlam (bo'sh = joriy qatlam;
   mavjud bo'lmasa avtomatik yaratiladi).
+- **Belgini qarama-qarshi tomonga (teskari)** — devor chiziq turidagi tishchalar
+  bir tomonga qaraydi; bu belgi yoqilsa poliliniya yo'nalishi teskarilanadi va
+  tishchalar qarama-qarshi tomonga o'tadi.
+
+> **Sozlamalar oynasi** endi tablarga bo'lingan: **Jadval / Chegaradoshlar / Tomorqa / Devor**.
+> Har bir funksiya sozlamasi o'z tabida.
 
 > Agar chiziq turi sizning maxsus turingiz bo'lsa (`acad.lin` da yo'q), u chizmada
 > allaqachon yuklangan bo'lishi kerak. Aks holda poliliniya joriy chiziq turida chiziladi
