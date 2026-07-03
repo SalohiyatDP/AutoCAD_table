@@ -73,6 +73,11 @@ namespace SalohiyatDP.AutoCADTable
         public double TomorqaArcRadius { get; set; } = 2.0;    // yoysimon burchak radiusi
         public double TomorqaLtScale { get; set; } = 1.0;      // nuqtali chiziq masshtabi (LTSCALE)
 
+        // Devor belgilash funksiyasi uchun
+        public string DevorLinetype { get; set; } = "";       // devor chiziq turi nomi (bo'sh = joriy/BYLAYER)
+        public double DevorLtScale { get; set; } = 0.3;        // devor chiziq masshtabi
+        public string DevorLayer { get; set; } = "";           // devor qatlami (bo'sh = joriy qatlam)
+
         private static string FilePath
         {
             get

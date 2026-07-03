@@ -46,6 +46,7 @@ Chegara uzunligi: <perimetr> m
 | `PLCHEGARA` | Poliliniyadan **chegaradoshlar jadvali** (faqat raqamlar). |
 | `PTPOLIGON` | GPS nuqta bloklaridan tartib raqamlari bo'yicha **poligon** (yopiq poliliniya) yasash. |
 | `PTTOMORQA` | Yopiq maydondan ichkariga surilgan **Tomorqa** poligoni (nuqtali) + markazga "Tomorqa" yozuvi. |
+| `PTDEVOR`   | **Devor belgilash**: devor bo'ylab poliliniya + devor chiziq turi va masshtab (0.3). |
 | `PTSOZLAMA` | Sozlamalar oynasi (matn balandligi, o'nlik xonalar, nuqta belgisi, jadval burchagi). |
 | `PTHAQIDA`  | Plagin va mualliflar haqida ("Haqida" oynasi). |
 | `PTLOAD`    | DLL ni qayta yuklash (LISP funksiyasi). |
@@ -70,6 +71,7 @@ Plagin yuklangach, AutoCAD lentasida (ribbon) **"SalohiyatTable"** yorlig'i payd
 
 - **"Chegaradoshlar"** paneli: **Chegaradoshlar (nuqtalardan)** (`PTCHEGARA`), **Chegaradoshlar (poliliniya)** (`PLCHEGARA`).
 - **"Poligon"** paneli: **Nuqtalardan poligon yaratish** (`PTPOLIGON`), **Tomorqa yaratish** (`PTTOMORQA`).
+- **"Devor"** paneli: **Devor belgilash** (`PTDEVOR`).
 
 **Mualliflar** ma'lumoti jadvalda emas — menyudagi **"Haqida"** oynasida ko'rsatiladi.
 
@@ -149,6 +151,30 @@ Ishlatish:
 
 > Nuqta ko'rsatilgan joy atrofi to'liq **yopiq** bo'lishi kerak (chiziqlar tutashgan).
 > Masofa maydonga nisbatan juda katta bo'lsa, ichki poligon yasalmaydi (ogohlantiradi).
+
+---
+
+## Devor belgilash (`PTDEVOR`)
+
+Devor bo'ylab poliliniya chizadi va unga devor chiziq turi hamda masshtabini qo'llab,
+**devor belgisi** hosil qiladi.
+
+Ishlatish:
+1. `PTDEVOR` buyrug'ini yozing.
+2. Devor bo'ylab nuqtalarni ketma-ket ko'rsating, tugatish uchun **Enter**.
+3. Poliliniyaga sozlamadagi chiziq turi, masshtab va qatlam qo'llanadi.
+
+**Sozlamalar** (`PTSOZLAMA`):
+- **Devor chiziq turi (linetype)** — devor belgisini beruvchi chiziq turi nomi
+  (masalan sizdagi `ОГРАДА_ГЛ`). Bo'sh qoldirilsa, joriy/BYLAYER chiziq turi ishlatiladi.
+- **Devor chiziq masshtabi** — chiziq turi masshtabi (standart `0.3`).
+- **Devor qatlami (layer)** — poliliniya joylanadigan qatlam (bo'sh = joriy qatlam;
+  mavjud bo'lmasa avtomatik yaratiladi).
+
+> Agar chiziq turi sizning maxsus turingiz bo'lsa (`acad.lin` da yo'q), u chizmada
+> allaqachon yuklangan bo'lishi kerak. Aks holda poliliniya joriy chiziq turida chiziladi
+> (buyruq qatorida eslatma chiqadi) — bunda **Devor qatlami** ni o'sha chiziq turi biriktirilgan
+> qatlamga qo'ysangiz, BYLAYER orqali devor belgisi to'g'ri chiqadi.
 
 > **Muhim:** menyu tugmalari `AdWindows.dll` sborkasiga bog'liq, u esa NuGet'da yo'q —
 > faqat AutoCAD o'rnatilgan papkada bo'ladi. Shuning uchun menyu paydo bo'lishi uchun

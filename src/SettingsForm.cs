@@ -26,6 +26,9 @@ namespace SalohiyatDP.AutoCADTable
         private ComboBox _cmbTomorqaCorner;
         private TextBox _txtTomorqaArcRadius;
         private TextBox _txtTomorqaLtScale;
+        private TextBox _txtDevorLinetype;
+        private TextBox _txtDevorLtScale;
+        private TextBox _txtDevorLayer;
 
         public SettingsForm(PluginSettings settings)
         {
@@ -41,7 +44,7 @@ namespace SalohiyatDP.AutoCADTable
             StartPosition = FormStartPosition.CenterScreen;
             MaximizeBox = false;
             MinimizeBox = false;
-            ClientSize = new Size(500, 536);
+            ClientSize = new Size(500, 646);
             Font = new Font("Segoe UI", 9F);
 
             int labelX = 15;
@@ -116,6 +119,21 @@ namespace SalohiyatDP.AutoCADTable
             AddLabel("Tomorqa chiziq masshtabi:", labelX, y + 3);
             _txtTomorqaLtScale = new TextBox { Left = inputX, Top = y, Width = 120 };
             Controls.Add(_txtTomorqaLtScale);
+            y += step;
+
+            AddLabel("Devor chiziq turi (linetype):", labelX, y + 3);
+            _txtDevorLinetype = new TextBox { Left = inputX, Top = y, Width = 260 };
+            Controls.Add(_txtDevorLinetype);
+            y += step;
+
+            AddLabel("Devor chiziq masshtabi:", labelX, y + 3);
+            _txtDevorLtScale = new TextBox { Left = inputX, Top = y, Width = 120 };
+            Controls.Add(_txtDevorLtScale);
+            y += step;
+
+            AddLabel("Devor qatlami (layer):", labelX, y + 3);
+            _txtDevorLayer = new TextBox { Left = inputX, Top = y, Width = 260 };
+            Controls.Add(_txtDevorLayer);
             y += step + 12;
 
             var btnOk = new Button { Text = "Saqlash", Left = 300, Top = y, Width = 90, DialogResult = DialogResult.OK };
@@ -149,6 +167,9 @@ namespace SalohiyatDP.AutoCADTable
             _cmbTomorqaCorner.SelectedIndex = (int)_s.TomorqaCorner; // Sharp=0, Arc=1
             _txtTomorqaArcRadius.Text = _s.TomorqaArcRadius.ToString(CultureInfo.InvariantCulture);
             _txtTomorqaLtScale.Text = _s.TomorqaLtScale.ToString(CultureInfo.InvariantCulture);
+            _txtDevorLinetype.Text = _s.DevorLinetype;
+            _txtDevorLtScale.Text = _s.DevorLtScale.ToString(CultureInfo.InvariantCulture);
+            _txtDevorLayer.Text = _s.DevorLayer;
         }
 
         private void OnSave(object sender, EventArgs e)
@@ -224,8 +245,21 @@ namespace SalohiyatDP.AutoCADTable
             _s.TomorqaOffset = toff;
             _s.TomorqaTextHeight = tth;
             _s.TomorqaCorner = (TomorqaCornerStyle)_cmbTomorqaCorner.SelectedIndex;
+            double dls;
+            if (!double.TryParse(_txtDevorLtScale.Text.Replace(',', '.'),
+                    NumberStyles.Float, CultureInfo.InvariantCulture, out dls) || dls <= 0)
+            {
+                MessageBox.Show("Devor chiziq masshtabi musbat son bo'lishi kerak.", "Xatolik",
+                    MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                DialogResult = DialogResult.None;
+                return;
+            }
+
             _s.TomorqaArcRadius = tar;
             _s.TomorqaLtScale = tls;
+            _s.DevorLinetype = _txtDevorLinetype.Text.Trim();
+            _s.DevorLtScale = dls;
+            _s.DevorLayer = _txtDevorLayer.Text.Trim();
             _s.Save();
         }
     }
