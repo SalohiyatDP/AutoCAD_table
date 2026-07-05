@@ -26,6 +26,7 @@ namespace SalohiyatDP.AutoCADTable
         [CommandMethod("PTTOMORQA")]
         public void CreateTomorqa()
         {
+            if (!SalohiyatDP.AutoCADTable.Licensing.LicenseGate.Ensure()) return;
             AcadDoc doc = AcadApp.DocumentManager.MdiActiveDocument;
             if (doc == null) return;
             Editor ed = doc.Editor;

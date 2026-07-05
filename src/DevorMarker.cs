@@ -22,6 +22,7 @@ namespace SalohiyatDP.AutoCADTable
         [CommandMethod("PTDEVOR")]
         public void MarkWall()
         {
+            if (!SalohiyatDP.AutoCADTable.Licensing.LicenseGate.Ensure()) return;
             AcadDoc doc = AcadApp.DocumentManager.MdiActiveDocument;
             if (doc == null) return;
             Editor ed = doc.Editor;

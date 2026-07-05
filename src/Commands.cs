@@ -26,6 +26,7 @@ namespace SalohiyatDP.AutoCADTable
         [CommandMethod("PTABLE")]
         public void PointTable()
         {
+            if (!SalohiyatDP.AutoCADTable.Licensing.LicenseGate.Ensure()) return;
             AcadDoc doc = AcadApp.DocumentManager.MdiActiveDocument;
             if (doc == null) return;
             Editor ed = doc.Editor;
@@ -44,6 +45,7 @@ namespace SalohiyatDP.AutoCADTable
         [CommandMethod("PLTABLE")]
         public void PolylineTable()
         {
+            if (!SalohiyatDP.AutoCADTable.Licensing.LicenseGate.Ensure()) return;
             AcadDoc doc = AcadApp.DocumentManager.MdiActiveDocument;
             if (doc == null) return;
             Editor ed = doc.Editor;
@@ -68,6 +70,7 @@ namespace SalohiyatDP.AutoCADTable
         [CommandMethod("PTCHEGARA")]
         public void NeighborsTablePoints()
         {
+            if (!SalohiyatDP.AutoCADTable.Licensing.LicenseGate.Ensure()) return;
             AcadDoc doc = AcadApp.DocumentManager.MdiActiveDocument;
             if (doc == null) return;
             Editor ed = doc.Editor;
@@ -86,6 +89,7 @@ namespace SalohiyatDP.AutoCADTable
         [CommandMethod("PLCHEGARA")]
         public void NeighborsTablePolyline()
         {
+            if (!SalohiyatDP.AutoCADTable.Licensing.LicenseGate.Ensure()) return;
             AcadDoc doc = AcadApp.DocumentManager.MdiActiveDocument;
             if (doc == null) return;
             Editor ed = doc.Editor;
