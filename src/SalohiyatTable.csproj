@@ -52,6 +52,11 @@
     </PackageReference>
   </ItemGroup>
 
+  <!-- Litsenziya moduli uchun: Machine ID (CPU/BIOS) WMI orqali olinadi. -->
+  <ItemGroup>
+    <Reference Include="System.Management" />
+  </ItemGroup>
+
   <!--
     Ribbon menyusi: AdWindows.dll topilgan taqdirdagina qo'shiladi.
     Shu tufayli AutoCADPath noto'g'ri bo'lsa ham loyiha baribir kompilyatsiya bo'ladi.
