@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>SalohiyatTable — Litsenziya generatori (vendor)</title>
+<style>
+  :root{--bg:#0f172a;--panel:#1e293b;--p2:#273449;--line:#334155;--txt:#e2e8f0;--mut:#94a3b8;--acc:#38bdf8;--ok:#22c55e;--bad:#ef4444}
+  *{box-sizing:border-box}
+  body{margin:0;font-family:system-ui,Segoe UI,Roboto,Arial,sans-serif;background:var(--bg);color:var(--txt);line-height:1.55}
+  .wrap{max-width:900px;margin:0 auto;padding:24px}
+  h1{font-size:21px;margin:0 0 4px}h2{font-size:15px;color:var(--acc);border-bottom:1px solid var(--line);padding-bottom:6px;margin:20px 0 10px}
+  .sub{color:var(--mut);font-size:14px;margin:0 0 16px}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:18px;margin-bottom:16px}
+  label{display:block;font-size:13px;color:var(--mut);margin:12px 0 4px;font-weight:600}
+  input[type=text],textarea,input[type=datetime-local]{width:100%;background:var(--p2);border:1px solid var(--line);color:var(--txt);border-radius:8px;padding:10px 12px;font-family:ui-monospace,Consolas,monospace;font-size:13px}
+  textarea{resize:vertical;min-height:80px;white-space:pre;overflow:auto}
+  button{background:var(--acc);color:#04212f;border:0;border-radius:8px;padding:10px 16px;font-weight:700;cursor:pointer;font-size:14px}
+  button.sec{background:var(--p2);color:var(--txt);border:1px solid var(--line)}
+  button.preset{background:transparent;border:1px solid var(--line);color:var(--mut);padding:6px 10px;font-size:12px;font-weight:600}
+  button:hover{filter:brightness(1.08)}
+  .btns{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px;align-items:center}
+  .out{background:#0b1220;border:1px dashed var(--line);border-radius:8px;padding:12px;font-family:ui-monospace,monospace;font-size:12.5px;word-break:break-all;white-space:pre-wrap;min-height:40px}
+  .note{background:rgba(56,189,248,.08);border:1px solid rgba(56,189,248,.35);border-radius:8px;padding:12px;font-size:13px;color:#bae6fd;margin-bottom:16px}
+  .kv{font-size:13px;color:var(--mut);margin:4px 0}.kv b{color:var(--txt);font-family:ui-monospace,monospace}
+  .pill{display:inline-block;font-size:12px;padding:2px 10px;border-radius:999px;margin-left:8px}
+  .pill.ok{background:rgba(34,197,94,.15);color:var(--ok)}.pill.bad{background:rgba(239,68,68,.15);color:var(--bad)}
+  small.hint{color:var(--mut);font-size:12px;display:block;margin-top:4px}
+  .err{color:var(--bad);font-size:13px;margin-top:8px;white-space:pre-wrap}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>SalohiyatTable — Litsenziya generatori</h1>
+  <p class="sub">Plagindagi <b>“Aktivatsiya qilish”</b> oynasidan olingan <b>Product key</b> (Machine ID) va muddat kiritilsa, plagin qabul qiladigan <b>Activation key</b> (litsenziya) ni yaratadi.</p>
+
+  <div class="note">
+    Bu vosita <b>SalohiyatTable</b> uchun (base64url format). Ichига shu plaginning ochiq kaliti joylashtirilgan — natija shu kalitga mosligini avtomatik tekshiradi.
+    Imzolash uchun <b>shu plaginning maxfiy kaliti</b> kerak (u faqat sizda).
+  </div>
+
+  <div class="card">
+    <h2>Litsenziya yaratish</h2>
+
+    <label>Product key (plagin “Aktivatsiya” oynasidagi Machine ID)</label>
+    <input type="text" id="machineId" placeholder="Masalan: enYEnITSqBJmIOEPa6ymA_3JhXf8UESjWLiT2aPyzIw"/>
+
+    <label>Amal qilish muddati (UTC)</label>
+    <input type="datetime-local" id="expiry"/>
+    <div class="btns">
+      <button class="preset" data-add="1m">+1 oy</button>
+      <button class="preset" data-add="6m">+6 oy</button>
+      <button class="preset" data-add="1y">+1 yil</button>
+      <button class="preset" data-add="3y">+3 yil</button>
+      <button class="preset" data-add="perp">Muddatsiz</button>
+    </div>
+
+    <label>Maxfiy kalit (SalohiyatTable private key, .NET XML)</label>
+    <textarea id="privKey" placeholder="<RSAKeyValue><Modulus>...</Modulus><Exponent>AQAB</Exponent><P>...</P>...<D>...</D></RSAKeyValue>"></textarea>
+
+    <div class="btns"><button id="genBtn">Litsenziya yaratish</button></div>
+    <div class="err" id="err"></div>
+
+    <div class="kv" style="margin-top:14px">Muddat (UTC): <b id="oDate">—</b></div>
+    <div class="kv">Mos kalit tekshiruvi: <span id="oVerify" class="pill">—</span></div>
+    <label>Activation key (mijozga bering — u “Paste” qilib “Activate” bosadi)</label>
+    <div class="out" id="licOut">—</div>
+    <div class="btns">
+      <button class="sec" id="copyBtn">Nusxa olish</button>
+      <button class="sec" id="dlBtn">license.lic yuklab olish</button>
+    </div>
+  </div>
+  <p class="sub">Talab: zamonaviy brauzer (Web Crypto). Format: <code>base64url(payload) + "." + base64url(signature)</code>, payload = <code>"machineId|expiryTicks"</code>, imzo = RSA/SHA-256/PKCS#1 v1.5.</p>
+</div>
+
+<script>
+"use strict";
+// Bu plaginning OCHIQ kaliti (Licensing/LicenseManager.cs dagi bilan bir xil) — faqat tekshirish uchun.
+const PUBLIC_KEY_B64 = "PFJTQUtleVZhbHVlPjxNb2R1bHVzPjVDOHA0NWVnU3NQNDJVRGxsdlpCQ3I3SVBDUGxZWTRjbVNoTEpwUXpKb1hPSWFnMkV5TVFhMEliVDhvSHBZVW9zckNDR0pqenJsUVRCazFSRFgrbDdPUGlBaWRaT2dUQWNtUXFWYmZHMHgxMGFyLzZ6bFBSRSs5U2xpbmlleWdYZFhETEtZcXEvc3lWRHhtcktBdzFIYzRDMytaaWVyVmtFZHA0U3FLTkFtK25uUy9sWHFEMHdKZHhXWDhDbTF4UGNTSE9LK2w5eVFGVVJua2hZSS9lNG5wN2ViK2htOWFrVmhiMGo0VkhBVHFXZ1ZRbzBzVTZZWDVKdHBGYmZVRWdVZnZNbDduU1RXcWxSRjdJeUlIdE0xRzJIclNFK244aCt5SWRZbjZlUWg2K0VyN3o1Y2JpRTJXWVNvOHlTdGFrREdpOU5pMEpLOTBUc2FObnh2K1NkUT09PC9Nb2R1bHVzPjxFeHBvbmVudD5BUUFCPC9FeHBvbmVudD48L1JTQUtleVZhbHVlPg==";
+const TICKS_EPOCH = 621355968000000000n;
+const enc = new TextEncoder();
+const bytesToB64 = b=>{let s="";for(const x of b)s+=String.fromCharCode(x);return btoa(s);};
+const bytesToB64url = b=>bytesToB64(b).replace(/\+/g,"-").replace(/\//g,"_").replace(/=+$/,"");
+const b64ToB64url = b=>b.replace(/\+/g,"-").replace(/\//g,"_").replace(/=+$/,"");
+function b64ToBytes(b64){const s=atob(b64);const a=new Uint8Array(s.length);for(let i=0;i<s.length;i++)a[i]=s.charCodeAt(i);return a;}
+function tag(xml,n){const m=xml.match(new RegExp("<"+n+">([\\s\\S]*?)</"+n+">"));if(!m)throw new Error("XML da <"+n+"> yo'q.");return m[1].trim();}
+function privXmlToJwk(xml){
+  return {kty:"RSA",n:b64ToB64url(tag(xml,"Modulus")),e:b64ToB64url(tag(xml,"Exponent")),d:b64ToB64url(tag(xml,"D")),
+          p:b64ToB64url(tag(xml,"P")),q:b64ToB64url(tag(xml,"Q")),dp:b64ToB64url(tag(xml,"DP")),dq:b64ToB64url(tag(xml,"DQ")),
+          qi:b64ToB64url(tag(xml,"InverseQ")),alg:"RS256",ext:true};
+}
+function pubXmlToJwk(xml){return {kty:"RSA",n:b64ToB64url(tag(xml,"Modulus")),e:b64ToB64url(tag(xml,"Exponent")),alg:"RS256",ext:true};}
+function dateToTicks(val){const m=val.match(/^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2})/);if(!m)throw new Error("Muddat kiritilmagan.");
+  return BigInt(Date.UTC(+m[1],+m[2]-1,+m[3],+m[4],+m[5],0))*10000n+TICKS_EPOCH;}
+function ticksToStr(t){return new Date(Number((t-TICKS_EPOCH)/10000n)).toISOString().replace("T"," ").replace(".000Z"," UTC");}
+
+async function generate(){
+  const err=document.getElementById("err");err.textContent="";setVerify(null);
+  document.getElementById("licOut").textContent="—";
+  try{
+    const machineId=document.getElementById("machineId").value.trim();
+    if(!machineId)throw new Error("Product key (Machine ID) kiriting.");
+    const ticks=dateToTicks(document.getElementById("expiry").value);
+    document.getElementById("oDate").textContent=ticksToStr(ticks);
+    const xml=document.getElementById("privKey").value.trim();
+    if(!xml)throw new Error("Maxfiy kalit (.NET XML) kiriting.");
+
+    const payload=enc.encode(machineId+"|"+ticks.toString());
+    const key=await crypto.subtle.importKey("jwk",privXmlToJwk(xml),{name:"RSASSA-PKCS1-v1_5",hash:"SHA-256"},false,["sign"]);
+    const sig=new Uint8Array(await crypto.subtle.sign("RSASSA-PKCS1-v1_5",key,payload));
+    if(sig.length!==256)throw new Error("Imzo 256 bayt emas — RSA-2048 kalit kerak.");
+    const license=bytesToB64url(payload)+"."+bytesToB64url(sig);
+    document.getElementById("licOut").textContent=license;
+
+    // Embedded ochiq kalit bilan tekshiramiz (private key shu plaginga mosmi?)
+    try{
+      const pubXml=new TextDecoder().decode(b64ToBytes(PUBLIC_KEY_B64));
+      const pub=await crypto.subtle.importKey("jwk",pubXmlToJwk(pubXml),{name:"RSASSA-PKCS1-v1_5",hash:"SHA-256"},false,["verify"]);
+      setVerify(await crypto.subtle.verify("RSASSA-PKCS1-v1_5",pub,sig,payload));
+    }catch{setVerify(null);}
+  }catch(e){err.textContent="Xato: "+e.message;}
+}
+function setVerify(ok){const el=document.getElementById("oVerify");
+  if(ok===null){el.className="pill";el.textContent="—";}
+  else if(ok){el.className="pill ok";el.textContent="✓ mos (bu plagin qabul qiladi)";}
+  else{el.className="pill bad";el.textContent="✗ mos emas — noto'g'ri maxfiy kalit";}}
+function preset(kind){const d=new Date();const p=n=>String(n).padStart(2,"0");
+  if(kind==="perp"){document.getElementById("expiry").value="9999-12-31T23:59";return;}
+  if(kind==="1m")d.setUTCMonth(d.getUTCMonth()+1);if(kind==="6m")d.setUTCMonth(d.getUTCMonth()+6);
+  if(kind==="1y")d.setUTCFullYear(d.getUTCFullYear()+1);if(kind==="3y")d.setUTCFullYear(d.getUTCFullYear()+3);
+  document.getElementById("expiry").value=`${d.getUTCFullYear()}-${p(d.getUTCMonth()+1)}-${p(d.getUTCDate())}T${p(d.getUTCHours())}:${p(d.getUTCMinutes())}`;}
+
+document.getElementById("genBtn").addEventListener("click",generate);
+document.querySelectorAll(".preset").forEach(b=>b.addEventListener("click",e=>{e.preventDefault();preset(b.dataset.add);}));
+document.getElementById("copyBtn").addEventListener("click",()=>{const t=document.getElementById("licOut").textContent;if(t&&t!=="—")navigator.clipboard.writeText(t).then(()=>{const b=document.getElementById("copyBtn");b.textContent="Nusxa olindi ✓";setTimeout(()=>b.textContent="Nusxa olish",1500);});});
+document.getElementById("dlBtn").addEventListener("click",()=>{const t=document.getElementById("licOut").textContent;if(!t||t==="—"){alert("Avval litsenziya yarating.");return;}const a=document.createElement("a");a.href=URL.createObjectURL(new Blob([t],{type:"text/plain"}));a.download="license.lic";a.click();URL.revokeObjectURL(a.href);});
+preset("1y");
+</script>
+</body>
+</html>
