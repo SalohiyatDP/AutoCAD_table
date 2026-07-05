@@ -42,6 +42,17 @@ namespace SalohiyatDP.AutoCADTable.Licensing
                 MessageBoxButtons.OK, MessageBoxIcon.Information);
         }
 
+        [CommandMethod("PTACTIVATE")]
+        public void Activate()
+        {
+            AcadDoc doc = AcadApp.DocumentManager.MdiActiveDocument;
+            if (doc == null) return;
+            using (var form = new ActivationForm())
+            {
+                AcadApp.ShowModalDialog(form);
+            }
+        }
+
         [CommandMethod("PTLIC")]
         public void InstallLicense()
         {

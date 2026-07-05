@@ -137,6 +137,15 @@ namespace SalohiyatDP.AutoCADTable
                 "Haqida", "PTHAQIDA",
                 "Plagin va mualliflar haqida ma'lumot"));
 
+            // Aktivatsiya paneli
+            var sourceA = new RibbonPanelSource { Title = "Litsenziya" };
+            var panelA = new RibbonPanel { Source = sourceA };
+            tab.Panels.Add(panelA);
+
+            sourceA.Items.Add(CreateButton(
+                "Aktivatsiya\nqilish", "PTACTIVATE",
+                "Plaginni faollashtirish: Machine ID (Product key) va faollashtirish kalitini kiritish"));
+
             // Lentani yaratilgan yorliqqa o'tkazish (ixtiyoriy)
             tab.IsActive = true;
         }
