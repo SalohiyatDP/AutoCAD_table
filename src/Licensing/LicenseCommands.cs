@@ -4,6 +4,8 @@ using Autodesk.AutoCAD.EditorInput;
 using Autodesk.AutoCAD.Runtime;
 using AcadApp = Autodesk.AutoCAD.ApplicationServices.Application;
 using AcadDoc = Autodesk.AutoCAD.ApplicationServices.Document;
+// "Exception" nomi System va Autodesk.AutoCAD.Runtime da mavjud; System.Exception ni nazarda tutamiz.
+using Exception = System.Exception;
 
 // Yangi buyruqlar sinfini AutoCAD ro'yxatga olishi uchun CommandClass shart
 // (loyihada boshqa CommandClass'lar mavjud bo'lgani uchun).
