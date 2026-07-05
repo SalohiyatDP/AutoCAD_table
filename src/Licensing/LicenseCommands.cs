@@ -67,7 +67,8 @@ namespace SalohiyatDP.AutoCADTable.Licensing
                 Filter = "Litsenziya fayllari (*.lic;*.txt)|*.lic;*.txt|Barcha fayllar (*.*)|*.*"
             })
             {
-                if (AcadApp.ShowModalDialog(dlg) != DialogResult.OK)
+                // OpenFileDialog — CommonDialog (Form emas), shuning uchun to'g'ridan-to'g'ri ShowDialog().
+                if (dlg.ShowDialog() != DialogResult.OK)
                 {
                     ed.WriteMessage("\nBekor qilindi.");
                     return;
