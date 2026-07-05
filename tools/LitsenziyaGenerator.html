@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>SalohiyatTable — Litsenziya generatori (vendor)</title>
+<title>SalohiyatTable — Litsenziya generatori (Base32 / Topography usuli)</title>
 <style>
   :root{--bg:#0f172a;--panel:#1e293b;--p2:#273449;--line:#334155;--txt:#e2e8f0;--mut:#94a3b8;--acc:#38bdf8;--ok:#22c55e;--bad:#ef4444}
   *{box-sizing:border-box}
@@ -32,18 +32,18 @@
 <body>
 <div class="wrap">
   <h1>SalohiyatTable — Litsenziya generatori</h1>
-  <p class="sub">Plagindagi <b>“Aktivatsiya qilish”</b> oynasidan olingan <b>Product key</b> (Machine ID) va muddat kiritilsa, plagin qabul qiladigan <b>Activation key</b> (litsenziya) ni yaratadi.</p>
+  <p class="sub">Topography bilan bir xil usul (Base32/GZip). Plagin “Aktivatsiya” oynasidagi <b>Product key</b> (Machine ID) va muddat kiritilsa, plagin qabul qiladigan <b>Activation key</b> ni yaratadi.</p>
 
   <div class="note">
-    Bu vosita <b>SalohiyatTable</b> uchun (base64url format). Ichига shu plaginning ochiq kaliti joylashtirilgan — natija shu kalitga mosligini avtomatik tekshiradi.
-    Imzolash uchun <b>shu plaginning maxfiy kaliti</b> kerak (u faqat sizda).
+    Bu vosita <b>SalohiyatTable</b> uchun. Ichига shu plaginning ochiq kaliti joylashtirilgan — natija shu kalitga mosligini avtomatik tekshiradi. Imzolash uchun <b>shu plaginning maxfiy kaliti</b> kerak (u faqat sizda).
   </div>
 
   <div class="card">
     <h2>Litsenziya yaratish</h2>
 
-    <label>Product key (plagin “Aktivatsiya” oynasidagi Machine ID)</label>
-    <input type="text" id="machineId" placeholder="Masalan: enYEnITSqBJmIOEPa6ymA_3JhXf8UESjWLiT2aPyzIw"/>
+    <label>Product key (plagin “Aktivatsiya” oynasidagi Machine ID — Base32)</label>
+    <input type="text" id="machineId" placeholder="Masalan: D6FQQAAAAAAAAAAB... (yoki XXXX-XXXX-XXXX)"/>
+    <small class="hint" id="pidHint">Vosita uni <b>Base32-dekod → GZip-yechish</b> orqali ProcessorId ga aylantiradi.</small>
 
     <label>Amal qilish muddati (UTC)</label>
     <input type="datetime-local" id="expiry"/>
@@ -61,7 +61,8 @@
     <div class="btns"><button id="genBtn">Litsenziya yaratish</button></div>
     <div class="err" id="err"></div>
 
-    <div class="kv" style="margin-top:14px">Muddat (UTC): <b id="oDate">—</b></div>
+    <div class="kv" style="margin-top:14px">Tiklangan ProcessorId: <b id="oProc">—</b></div>
+    <div class="kv">Muddat (UTC): <b id="oDate">—</b></div>
     <div class="kv">Mos kalit tekshiruvi: <span id="oVerify" class="pill">—</span></div>
     <label>Activation key (mijozga bering — u “Paste” qilib “Activate” bosadi)</label>
     <div class="out" id="licOut">—</div>
@@ -70,70 +71,72 @@
       <button class="sec" id="dlBtn">license.lic yuklab olish</button>
     </div>
   </div>
-  <p class="sub">Talab: zamonaviy brauzer (Web Crypto). Format: <code>base64url(payload) + "." + base64url(signature)</code>, payload = <code>"machineId|expiryTicks"</code>, imzo = RSA/SHA-256/PKCS#1 v1.5.</p>
+  <p class="sub">Talab: zamonaviy brauzer (Web Crypto + CompressionStream). Format: <code>Base32(GZip("ProcessorId|ticks" + RSA-SHA256 imzo))</code>.</p>
 </div>
 
 <script>
 "use strict";
 // Bu plaginning OCHIQ kaliti (Licensing/LicenseManager.cs dagi bilan bir xil) — faqat tekshirish uchun.
 const PUBLIC_KEY_B64 = "PFJTQUtleVZhbHVlPjxNb2R1bHVzPjVDOHA0NWVnU3NQNDJVRGxsdlpCQ3I3SVBDUGxZWTRjbVNoTEpwUXpKb1hPSWFnMkV5TVFhMEliVDhvSHBZVW9zckNDR0pqenJsUVRCazFSRFgrbDdPUGlBaWRaT2dUQWNtUXFWYmZHMHgxMGFyLzZ6bFBSRSs5U2xpbmlleWdYZFhETEtZcXEvc3lWRHhtcktBdzFIYzRDMytaaWVyVmtFZHA0U3FLTkFtK25uUy9sWHFEMHdKZHhXWDhDbTF4UGNTSE9LK2w5eVFGVVJua2hZSS9lNG5wN2ViK2htOWFrVmhiMGo0VkhBVHFXZ1ZRbzBzVTZZWDVKdHBGYmZVRWdVZnZNbDduU1RXcWxSRjdJeUlIdE0xRzJIclNFK244aCt5SWRZbjZlUWg2K0VyN3o1Y2JpRTJXWVNvOHlTdGFrREdpOU5pMEpLOTBUc2FObnh2K1NkUT09PC9Nb2R1bHVzPjxFeHBvbmVudD5BUUFCPC9FeHBvbmVudD48L1JTQUtleVZhbHVlPg==";
+const B32 = "ABCDEFGHIJKLMNOPQRSTUVWXYZ234567";
 const TICKS_EPOCH = 621355968000000000n;
-const enc = new TextEncoder();
-const bytesToB64 = b=>{let s="";for(const x of b)s+=String.fromCharCode(x);return btoa(s);};
-const bytesToB64url = b=>bytesToB64(b).replace(/\+/g,"-").replace(/\//g,"_").replace(/=+$/,"");
+const enc = new TextEncoder(), dec = new TextDecoder();
+
+function base32Encode(data){let o="",bits=0,v=0;for(const b of data){v=(v<<8)|b;bits+=8;while(bits>=5){o+=B32[(v>>(bits-5))&31];bits-=5;v&=(1<<bits)-1;}}if(bits>0)o+=B32[(v<<(5-bits))&31];return o;}
+function base32Decode(str){str=str.toUpperCase();const out=[];let bits=0,v=0;for(const c of str){if(c==='-'||c==='\n'||c==='\r'||c===' ')continue;const i=B32.indexOf(c);if(i<0)throw new Error("Yaroqsiz Base32 belgi: "+c);v=(v<<5)|i;bits+=5;if(bits>=8){out.push((v>>(bits-8))&255);bits-=8;v&=(1<<bits)-1;}}return new Uint8Array(out);}
+async function gzip(b){const cs=new CompressionStream("gzip");const w=cs.writable.getWriter();w.write(b);w.close();return new Uint8Array(await new Response(cs.readable).arrayBuffer());}
+async function gunzip(b){const ds=new DecompressionStream("gzip");const w=ds.writable.getWriter();w.write(b);w.close();return new Uint8Array(await new Response(ds.readable).arrayBuffer());}
+function b64ToBytes(s){const bin=atob(s);const a=new Uint8Array(bin.length);for(let i=0;i<bin.length;i++)a[i]=bin.charCodeAt(i);return a;}
 const b64ToB64url = b=>b.replace(/\+/g,"-").replace(/\//g,"_").replace(/=+$/,"");
-function b64ToBytes(b64){const s=atob(b64);const a=new Uint8Array(s.length);for(let i=0;i<s.length;i++)a[i]=s.charCodeAt(i);return a;}
 function tag(xml,n){const m=xml.match(new RegExp("<"+n+">([\\s\\S]*?)</"+n+">"));if(!m)throw new Error("XML da <"+n+"> yo'q.");return m[1].trim();}
-function privXmlToJwk(xml){
-  return {kty:"RSA",n:b64ToB64url(tag(xml,"Modulus")),e:b64ToB64url(tag(xml,"Exponent")),d:b64ToB64url(tag(xml,"D")),
-          p:b64ToB64url(tag(xml,"P")),q:b64ToB64url(tag(xml,"Q")),dp:b64ToB64url(tag(xml,"DP")),dq:b64ToB64url(tag(xml,"DQ")),
-          qi:b64ToB64url(tag(xml,"InverseQ")),alg:"RS256",ext:true};
-}
+function privXmlToJwk(xml){return {kty:"RSA",n:b64ToB64url(tag(xml,"Modulus")),e:b64ToB64url(tag(xml,"Exponent")),d:b64ToB64url(tag(xml,"D")),p:b64ToB64url(tag(xml,"P")),q:b64ToB64url(tag(xml,"Q")),dp:b64ToB64url(tag(xml,"DP")),dq:b64ToB64url(tag(xml,"DQ")),qi:b64ToB64url(tag(xml,"InverseQ")),alg:"RS256",ext:true};}
 function pubXmlToJwk(xml){return {kty:"RSA",n:b64ToB64url(tag(xml,"Modulus")),e:b64ToB64url(tag(xml,"Exponent")),alg:"RS256",ext:true};}
-function dateToTicks(val){const m=val.match(/^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2})/);if(!m)throw new Error("Muddat kiritilmagan.");
-  return BigInt(Date.UTC(+m[1],+m[2]-1,+m[3],+m[4],+m[5],0))*10000n+TICKS_EPOCH;}
+function dateToTicks(val){const m=val.match(/^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2})/);if(!m)throw new Error("Muddat kiritilmagan.");return BigInt(Date.UTC(+m[1],+m[2]-1,+m[3],+m[4],+m[5],0))*10000n+TICKS_EPOCH;}
 function ticksToStr(t){return new Date(Number((t-TICKS_EPOCH)/10000n)).toISOString().replace("T"," ").replace(".000Z"," UTC");}
 
+let lastLicense=null;
 async function generate(){
   const err=document.getElementById("err");err.textContent="";setVerify(null);
-  document.getElementById("licOut").textContent="—";
+  document.getElementById("licOut").textContent="—";document.getElementById("oProc").textContent="—";
   try{
     const machineId=document.getElementById("machineId").value.trim();
     if(!machineId)throw new Error("Product key (Machine ID) kiriting.");
+    let processorId;
+    try{ processorId = dec.decode(await gunzip(base32Decode(machineId))); }
+    catch(e){ throw new Error("Machine ID ni ProcessorId ga aylantirib bo'lmadi (Base32/GZip). To'g'ri Product key kiriting.\n"+e.message); }
+    document.getElementById("oProc").textContent=processorId;
+
     const ticks=dateToTicks(document.getElementById("expiry").value);
     document.getElementById("oDate").textContent=ticksToStr(ticks);
     const xml=document.getElementById("privKey").value.trim();
     if(!xml)throw new Error("Maxfiy kalit (.NET XML) kiriting.");
 
-    const payload=enc.encode(machineId+"|"+ticks.toString());
+    const payloadStr=processorId+"|"+ticks.toString();
+    const payload=enc.encode(payloadStr);
     const key=await crypto.subtle.importKey("jwk",privXmlToJwk(xml),{name:"RSASSA-PKCS1-v1_5",hash:"SHA-256"},false,["sign"]);
     const sig=new Uint8Array(await crypto.subtle.sign("RSASSA-PKCS1-v1_5",key,payload));
     if(sig.length!==256)throw new Error("Imzo 256 bayt emas — RSA-2048 kalit kerak.");
-    const license=bytesToB64url(payload)+"."+bytesToB64url(sig);
-    document.getElementById("licOut").textContent=license;
 
-    // Embedded ochiq kalit bilan tekshiramiz (private key shu plaginga mosmi?)
+    const combined=new Uint8Array(payload.length+256);
+    combined.set(payload,0);combined.set(sig,payload.length);
+    const license=base32Encode(await gzip(combined));
+    document.getElementById("licOut").textContent=license;
+    lastLicense=license;
+
     try{
-      const pubXml=new TextDecoder().decode(b64ToBytes(PUBLIC_KEY_B64));
+      const pubXml=dec.decode(b64ToBytes(PUBLIC_KEY_B64));
       const pub=await crypto.subtle.importKey("jwk",pubXmlToJwk(pubXml),{name:"RSASSA-PKCS1-v1_5",hash:"SHA-256"},false,["verify"]);
       setVerify(await crypto.subtle.verify("RSASSA-PKCS1-v1_5",pub,sig,payload));
     }catch{setVerify(null);}
   }catch(e){err.textContent="Xato: "+e.message;}
 }
-function setVerify(ok){const el=document.getElementById("oVerify");
-  if(ok===null){el.className="pill";el.textContent="—";}
-  else if(ok){el.className="pill ok";el.textContent="✓ mos (bu plagin qabul qiladi)";}
-  else{el.className="pill bad";el.textContent="✗ mos emas — noto'g'ri maxfiy kalit";}}
-function preset(kind){const d=new Date();const p=n=>String(n).padStart(2,"0");
-  if(kind==="perp"){document.getElementById("expiry").value="9999-12-31T23:59";return;}
-  if(kind==="1m")d.setUTCMonth(d.getUTCMonth()+1);if(kind==="6m")d.setUTCMonth(d.getUTCMonth()+6);
-  if(kind==="1y")d.setUTCFullYear(d.getUTCFullYear()+1);if(kind==="3y")d.setUTCFullYear(d.getUTCFullYear()+3);
-  document.getElementById("expiry").value=`${d.getUTCFullYear()}-${p(d.getUTCMonth()+1)}-${p(d.getUTCDate())}T${p(d.getUTCHours())}:${p(d.getUTCMinutes())}`;}
+function setVerify(ok){const el=document.getElementById("oVerify");if(ok===null){el.className="pill";el.textContent="—";}else if(ok){el.className="pill ok";el.textContent="✓ mos (bu plagin qabul qiladi)";}else{el.className="pill bad";el.textContent="✗ mos emas — noto'g'ri maxfiy kalit";}}
+function preset(kind){const d=new Date();const p=n=>String(n).padStart(2,"0");if(kind==="perp"){document.getElementById("expiry").value="9999-12-31T23:59";return;}if(kind==="1m")d.setUTCMonth(d.getUTCMonth()+1);if(kind==="6m")d.setUTCMonth(d.getUTCMonth()+6);if(kind==="1y")d.setUTCFullYear(d.getUTCFullYear()+1);if(kind==="3y")d.setUTCFullYear(d.getUTCFullYear()+3);document.getElementById("expiry").value=`${d.getUTCFullYear()}-${p(d.getUTCMonth()+1)}-${p(d.getUTCDate())}T${p(d.getUTCHours())}:${p(d.getUTCMinutes())}`;}
 
 document.getElementById("genBtn").addEventListener("click",generate);
 document.querySelectorAll(".preset").forEach(b=>b.addEventListener("click",e=>{e.preventDefault();preset(b.dataset.add);}));
-document.getElementById("copyBtn").addEventListener("click",()=>{const t=document.getElementById("licOut").textContent;if(t&&t!=="—")navigator.clipboard.writeText(t).then(()=>{const b=document.getElementById("copyBtn");b.textContent="Nusxa olindi ✓";setTimeout(()=>b.textContent="Nusxa olish",1500);});});
-document.getElementById("dlBtn").addEventListener("click",()=>{const t=document.getElementById("licOut").textContent;if(!t||t==="—"){alert("Avval litsenziya yarating.");return;}const a=document.createElement("a");a.href=URL.createObjectURL(new Blob([t],{type:"text/plain"}));a.download="license.lic";a.click();URL.revokeObjectURL(a.href);});
+document.getElementById("copyBtn").addEventListener("click",()=>{if(lastLicense)navigator.clipboard.writeText(lastLicense).then(()=>{const b=document.getElementById("copyBtn");b.textContent="Nusxa olindi ✓";setTimeout(()=>b.textContent="Nusxa olish",1500);});});
+document.getElementById("dlBtn").addEventListener("click",()=>{if(!lastLicense){alert("Avval litsenziya yarating.");return;}const a=document.createElement("a");a.href=URL.createObjectURL(new Blob([lastLicense],{type:"text/plain"}));a.download="license.lic";a.click();URL.revokeObjectURL(a.href);});
 preset("1y");
 </script>
 </body>

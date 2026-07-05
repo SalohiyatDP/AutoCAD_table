@@ -1,43 +1,35 @@
-using System;
 using System.Management;
-using System.Security.Cryptography;
 using System.Text;
 
 namespace SalohiyatDP.AutoCADTable.Licensing
 {
     /// <summary>
-    /// Joriy kompyuter uchun barqaror identifikator (CPU ProcessorId + BIOS seriya raqami
-    /// asosida SHA-256). Foydalanuvchi bu ID ni sizga (vendorga) yuboradi, siz esa unga
-    /// mos litsenziya imzolaysiz.
+    /// Joriy kompyuter identifikatori (Product key). Topography bilan bir xil usul:
+    ///   Machine ID = Base32(GZip(UTF8(ProcessorId)))
     /// </summary>
     public static class MachineIdProvider
     {
         public static string Get()
         {
-            string cpu = QueryWmi("Win32_Processor", "ProcessorId");
-            string bios = QueryWmi("Win32_BIOS", "SerialNumber");
-            using (SHA256 sha = SHA256.Create())
-            {
-                byte[] hash = sha.ComputeHash(Encoding.UTF8.GetBytes(cpu + "|" + bios));
-                return Convert.ToBase64String(hash).TrimEnd('=').Replace('+', '-').Replace('/', '_');
-            }
+            string processorId = GetProcessorId();
+            return LicenseCodec.Base32Encode(LicenseCodec.Compress(Encoding.UTF8.GetBytes(processorId)));
         }
 
-        private static string QueryWmi(string wmiClass, string property)
+        public static string GetProcessorId()
         {
             try
             {
-                using (var searcher = new ManagementObjectSearcher("SELECT " + property + " FROM " + wmiClass))
+                using (var searcher = new ManagementObjectSearcher("SELECT ProcessorId FROM Win32_Processor"))
                 {
                     foreach (ManagementBaseObject mo in searcher.Get())
                     {
-                        object v = mo[property];
+                        object v = mo["ProcessorId"];
                         if (v != null) return v.ToString().Trim();
                     }
                 }
             }
-            catch { /* WMI mavjud bo'lmasa bo'sh qaytadi */ }
-            return "";
+            catch { /* WMI mavjud bo'lmasa bo'sh */ }
+            return string.Empty;
         }
     }
 }
